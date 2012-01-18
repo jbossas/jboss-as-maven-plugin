@@ -29,8 +29,10 @@ import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.as.plugin.deployment.common.AbstractServerConnection;
 import org.jboss.dmr.ModelNode;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Adds a resource
@@ -58,7 +60,23 @@ public class AddResource extends AbstractServerConnection {
      * @parameter
      */
     private Map<String, String> properties;
-
+    
+    /**
+     * The operation subresources
+     *
+     * @parameter
+     */
+    private String[] subresources;
+    
+    /**
+     * Flag to start the operation, if necessary
+     *
+     * @parameter
+     *      default-value="false"
+     *      alias="enable-resource"
+     */
+    private boolean enableResource;
+    
     /**
      * Specifies whether force mode should be used or not.
      * </p>
@@ -67,6 +85,10 @@ public class AddResource extends AbstractServerConnection {
      * @parameter default-value="true"
      */
     private boolean force;
+    
+    public void setSubresources(String[] subresources) { this.subresources = subresources; }
+    
+    public void setEnableResource(boolean enableResource) { this.enableResource = enableResource; }
 
     @Override
     public String goal() {
@@ -97,42 +119,108 @@ public class AddResource extends AbstractServerConnection {
                 }
             }
 
-
             if (found && force) {
                 //we need to remove the datasource
                 request = new ModelNode();
                 request.get(ClientConstants.OP).set("remove");
-                setupAddress(request);
+                request.get("recursive").set(true);
+                setupAddress(address,request);
                 r = client.execute(new OperationBuilder(request).build());
                 reportFailure(r);
-
             } else if (found && !force) {
                 throw new RuntimeException("Resource " + address + " already exists ");
             }
-            request = new ModelNode();
-            request.get(ClientConstants.OP).set(ClientConstants.ADD);
-            setupAddress(request);
-            for (Map.Entry<String, String> prop : properties.entrySet()) {
-                final String[] props = prop.getKey().split(",");
-                if (props.length == 0) {
-                    throw new RuntimeException("Invalid property " + prop);
-                }
-                ModelNode node = request;
-                for (int i = 0; i < props.length - 1; ++i) {
-                    node = node.get(props[i]);
-                }
-                final String value = prop.getValue() == null ? "" : prop.getValue();
-                if(value.startsWith("!!")) {
-                    handleDmrString(node, props[props.length - 1], value);
-                } else {
-                    node.get(props[props.length - 1]).set(value);
+            
+            /*
+             * Add the main resource
+             */
+            addResource( address, properties, client );
+            
+            /*
+             * Add subresources, if applicable
+             */
+            if (subresources != null && subresources.length != 0) {
+                String subAddress;
+                Map<String,String> props;
+                for (String subresource : subresources) {
+                    int index = subresource.indexOf(',');
+                    if ( index < 0 ) {
+                        subAddress = subresource;
+                        props = new TreeMap<String,String>();
+                    } else {
+                        subAddress = subresource.substring(0,index).trim();
+                        String parameters = subresource.substring(index+1).trim();
+                        props = mapProperties(parameters);
+                    }
+                    addResource(address + "," + subAddress, props, client);
                 }
             }
-            r = client.execute(new OperationBuilder(request).build());
-            reportFailure(r);
+            
+            /*
+             * Because some subsystems, like xa-datasource, require sub-resources
+             * The resource cannot be automatically enabled before all the sub-resources
+             * are added.  If enable-resouce is set to "true", enable the resource
+             */
+            if ( enableResource ) {
+                request = new ModelNode();
+                request.get(ClientConstants.OP).set("enable");
+                setupAddress(address,request);
+                r = client.execute(new OperationBuilder(request).build());
+                reportFailure(r);
+            }
         } catch (Exception e) {
             throw new MojoExecutionException(String.format("Could not execute goal %s. Reason: %s", goal(), e.getMessage()), e);
+            
         }
+    }
+    
+    /**
+     * Create Map from comma-separated string
+     */
+    Map<String, String> mapProperties(String input) {
+        Map<String, String> returnValue = new TreeMap<String,String>();
+        if (input == null || input.trim().equals("")) {
+            return returnValue;
+        }
+        
+        String[] unprocessedValues = input.split(",");
+        for (String unprocessedValue : unprocessedValues) {
+            String[] keyValuePair = unprocessedValue.split("=");
+            if (keyValuePair.length != 2) {
+                throw new RuntimeException( "Invalid property " + unprocessedValue );
+            }
+            returnValue.put(keyValuePair[0].trim(), keyValuePair[1].trim());
+        }
+        
+        return returnValue;
+    }
+    
+    /**
+     * Add resource with properties
+     */
+    private void addResource(String address, Map<String, String> properties, ModelControllerClient client ) 
+            throws IOException {
+        ModelNode request = new ModelNode();
+        request.get(ClientConstants.OP).set(ClientConstants.ADD);
+        setupAddress(address, request);
+        for (Map.Entry<String, String> prop : properties.entrySet()) {
+            final String[] props = prop.getKey().split(",");
+            if (props.length == 0) {
+                throw new RuntimeException("Invalid property " + prop);
+            }
+            ModelNode node = request;
+            for (int i = 0; i < props.length - 1; ++i) {
+                node = node.get(props[i]);
+            }
+            final String value = prop.getValue() == null ? "" : prop.getValue();
+            if(value.startsWith("!!")) {
+                handleDmrString(node, props[props.length - 1], value);
+            } else {
+                node.get(props[props.length - 1]).set(value);
+            }
+        }
+        ModelNode r = client.execute(new OperationBuilder(request).build());
+        reportFailure(r);
     }
 
     /**
@@ -143,8 +231,8 @@ public class AddResource extends AbstractServerConnection {
         node.get(name).set(ModelNode.fromString(realValue));
     }
 
-    private void setupAddress(final ModelNode request) {
-        String[] parts = address.split(",");
+    private void setupAddress(String inputAddress, final ModelNode request) {
+        String[] parts = inputAddress.split(",");
         for (String part : parts) {
             String[] address = part.split("=");
             if (address.length != 2) {
@@ -191,5 +279,4 @@ public class AddResource extends AbstractServerConnection {
             this.type = type;
         }
     }
-
 }
