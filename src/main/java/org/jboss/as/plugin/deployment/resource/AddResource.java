@@ -126,6 +126,8 @@ public class AddResource extends AbstractServerConnection {
     }
 
     private void processResources(final ModelControllerClient client, final Resource... resources) throws IOException {
+        ModelNode finalOP = null;
+        
         for (Resource resource : resources) {
             final String address;
             if (this.address == null) {
@@ -148,9 +150,18 @@ public class AddResource extends AbstractServerConnection {
             op.get(ClientConstants.ROLLBACK_ON_RUNTIME_FAILURE).set(true);
             op.get(ClientConstants.STEPS).add(buildAddOperation(address, resource.getProperties()));
             if (resource.isEnableResource()) {
-                op.get(ClientConstants.STEPS).add(buildEnableOperation(address));
+                if (finalOP != null) {
+                    throw new RuntimeException("Only one resouce can have 'enableResource' set to 'true'");
+                }
+                finalOP = buildEnableOperation(address);
+                //op.get(ClientConstants.STEPS).add(buildEnableOperation(address));
             }
             ModelNode r = client.execute(OperationBuilder.create(op).build());
+            reportFailure(r);
+        }
+        
+        if (finalOP != null) {
+            ModelNode r = client.execute(OperationBuilder.create(finalOP).build());
             reportFailure(r);
         }
     }
