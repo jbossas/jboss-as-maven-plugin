@@ -59,6 +59,13 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
      */
     @Parameter(defaultValue = "9999", property = "jboss-as.port")
     private int port;
+    
+    /**
+     * Specifies the id of the server if the username and password is to be
+     * retrieved from the settings.xml file
+     */
+    @Parameter(property = "jboss-as.id")
+    private String id;
 
     /**
      * Specifies the username to use if prompted to authenticate by the server.
@@ -168,9 +175,21 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     public synchronized final CallbackHandler getCallbackHandler() {
         CallbackHandler result = handler;
         if (result == null) {
+        	if(username == null && password == null && id != null) {
+        		username = getUsernameFromSettings();
+        		password = getPasswordFromSettings();
+        	}
             result = handler = new ClientCallbackHandler(username, password);
         }
         return result;
+    }
+    
+    private String getPasswordFromSettings() {
+    	return "testPassword";
+    }
+    
+    private String getUsernameFromSettings() {
+    	return "testUsername";
     }
 
     private boolean isDomainServer(final ModelControllerClient client) {
