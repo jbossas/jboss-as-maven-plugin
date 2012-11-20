@@ -110,8 +110,8 @@ public class AbstractServerConnectionTest extends AbstractJbossMavenPluginMojoTe
 			mojo.setLog(log);
 			mojo.getCallbackHandler();
 			InOrder inOrder = inOrder(log);
-			inOrder.verify(log).info(Deploy.DEBUG_MESSAGE_SETTINGS_HAS_ID);
-			inOrder.verify(log).info(Deploy.DEBUG_MESSAGE_NO_CREDS);
+			inOrder.verify(log).debug(Deploy.DEBUG_MESSAGE_SETTINGS_HAS_ID);
+			inOrder.verify(log).debug(Deploy.DEBUG_MESSAGE_NO_CREDS);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Couldn't find \"deploy\" mojo");
@@ -151,8 +151,8 @@ public class AbstractServerConnectionTest extends AbstractJbossMavenPluginMojoTe
 			mojo.setLog(log);
 			mojo.getCallbackHandler();
 			InOrder inOrder = inOrder(log);
-			inOrder.verify(log).info(Deploy.DEBUG_MESSAGE_SETTINGS_HAS_ID);
-			inOrder.verify(log).info(Deploy.DEBUG_MESSAGE_SETTINGS_HAS_CREDS);
+			inOrder.verify(log).debug(Deploy.DEBUG_MESSAGE_SETTINGS_HAS_ID);
+			inOrder.verify(log).debug(Deploy.DEBUG_MESSAGE_SETTINGS_HAS_CREDS);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Couldn't find \"deploy\" mojo");

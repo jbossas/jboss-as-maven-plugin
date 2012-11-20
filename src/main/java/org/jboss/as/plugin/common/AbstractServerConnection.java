@@ -210,13 +210,13 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 		if(settings != null) {
 			Server server = settings.getServer(id);
 			if(server != null) {
-				getLog().info(DEBUG_MESSAGE_SETTINGS_HAS_ID);
+				getLog().debug(DEBUG_MESSAGE_SETTINGS_HAS_ID);
 				password = server.getPassword();
 				username = server.getUsername();
 				if(username != null && password != null) {
-					getLog().info(DEBUG_MESSAGE_SETTINGS_HAS_CREDS);
+					getLog().debug(DEBUG_MESSAGE_SETTINGS_HAS_CREDS);
 				} else {
-					getLog().info(DEBUG_MESSAGE_NO_CREDS);
+					getLog().debug(DEBUG_MESSAGE_NO_CREDS);
 				}
 			} else {
 				getLog().debug(DEBUG_MESSAGE_NO_SERVER_SECTION);
@@ -225,14 +225,6 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 			getLog().debug(DEBUG_MESSAGE_NO_SETTINGS_FILE);
 		}
 	}
-
-    private String getPasswordFromSettings() {
-    	return "testPassword";
-    }
-    
-    private String getUsernameFromSettings() {
-    	return "testUsername";
-    }
 
     private boolean isDomainServer(final ModelControllerClient client) {
         boolean result = false;
