@@ -72,7 +72,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 	/**
 	 * Provides a reference to the settings file.
 	 */
-    @Parameter(property = "${settings}", readonly = true, required = true)
+    @Parameter(property = "settings", readonly = true, required = true, defaultValue = "${settings}")
 	private Settings settings;
 
     /**

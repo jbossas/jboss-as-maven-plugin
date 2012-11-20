@@ -15,10 +15,9 @@
 
 package org.jboss.as.plugin.common;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author stevemoyer
@@ -38,6 +37,11 @@ public class AbstractServerConnectionTest extends AbstractJbossMavenPluginMojoTe
 	 */
 	@After
 	public void tearDown() throws Exception {
+	}
+	
+	@Test
+	public void testDoNothing() {
+		
 	}
 
 }
