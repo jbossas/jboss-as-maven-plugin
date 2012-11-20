@@ -28,8 +28,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import javax.security.auth.callback.CallbackHandler;
 
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.settings.Settings;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.domain.DomainClient;
 import org.jboss.dmr.ModelNode;
@@ -66,6 +69,12 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
      */
     @Parameter(property = "jboss-as.id")
     private String id;
+    
+	/**
+	 * Provides a reference to the settings file.
+	 */
+    @Parameter(property = "${settings}", readonly = true, required = true)
+	private Settings settings;
 
     /**
      * Specifies the username to use if prompted to authenticate by the server.
@@ -176,14 +185,19 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         CallbackHandler result = handler;
         if (result == null) {
         	if(username == null && password == null && id != null) {
-        		username = getUsernameFromSettings();
-        		password = getPasswordFromSettings();
+        		getCredentialsFromSettings();
         	}
             result = handler = new ClientCallbackHandler(username, password);
         }
         return result;
     }
     
+	private void getCredentialsFromSettings() {
+		getLog().info("AbstractServerConnection.getCredentialsFromSettings()");
+		password = settings.getServer(id).getPassword();
+		username = settings.getServer(id).getUsername();
+	}
+
     private String getPasswordFromSettings() {
     	return "testPassword";
     }
