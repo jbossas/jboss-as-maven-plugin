@@ -117,7 +117,9 @@ Deploy/Undeploy Examples
 </project>
 ----------
 
-  The artifact must be already listed as a dependency in the projects pom.xml.
+  The artifact must be already listed as a dependency in the projects pom.xml, otherwise you have to specify the
+         version (optional classifier and type). In case the dependency is not within your pom.xml,
+         it's fetched from the default repositories.
 
 
 * Deploying your application in domain mode.
