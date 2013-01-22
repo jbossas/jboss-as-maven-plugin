@@ -26,6 +26,7 @@ Execute Commands Examples
                 <artifactId>jboss-as-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
+                    <ifExists>subsystem=datasources,data-source=java:jboss/myDs</ifExists>
                     <execute-commands>
                         <commands>
                             <command>/subsystem=logging/file-handler=debug:add(level=DEBUG,autoflush=true,file={"relative-to"=>"jboss.server.log.dir", "path"=>"debug.log"})</command>
