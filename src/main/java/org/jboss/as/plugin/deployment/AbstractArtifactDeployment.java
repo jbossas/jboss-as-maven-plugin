@@ -14,7 +14,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.jboss.as.plugin.common.DeploymentFailureException;
 
 /**
- * @author <a href="mailto:mark.paluch@1und1.de">Mark Paluch</a>
+ * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
  * @since 22.01.13 10:41
  */
 public abstract class AbstractArtifactDeployment extends AbstractDeployment {
