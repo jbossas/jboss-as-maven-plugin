@@ -88,6 +88,12 @@ public class ExecuteCommands extends AbstractServerConnection {
                 } finally {
                     close();
                 }
+            } catch (RuntimeException e) {
+                if (ignoreFailure) {
+                    getLog().error(e.toString());
+                    return;
+                }
+                throw e;
             } catch (MojoFailureException e) {
                 if (ignoreFailure) {
                     getLog().error(e.toString());
