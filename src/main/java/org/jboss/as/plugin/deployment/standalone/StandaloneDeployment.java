@@ -52,34 +52,39 @@ public class StandaloneDeployment implements Deployment {
     private final ModelControllerClient client;
     private final String name;
     private final Type type;
+    private final String replacementPattern;
 
     /**
      * Creates a new deployment.
      *
-     * @param client  the client that is connected.
+     * @param client the client that is connected.
      * @param content the content for the deployment.
-     * @param name    the name of the deployment, if {@code null} the name of the content file is used.
-     * @param type    the deployment type.
+     * @param name the name of the deployment, if {@code null} the name of the content file is used.
+     * @param type the deployment type.
+     * @param replacementPattern the replacement pattern (old artifact name)
      */
-    public StandaloneDeployment(final ModelControllerClient client, final File content, final String name, final Type type) {
+    public StandaloneDeployment(final ModelControllerClient client, final File content, final String name,
+                                final String replacementPattern, final Type type) {
         this.content = content;
         this.client = client;
         this.name = (name == null ? content.getName() : name);
         this.type = type;
+        this.replacementPattern = (replacementPattern == null ? name : replacementPattern);
     }
 
     /**
      * Creates a new deployment.
      *
-     * @param client  the client that is connected.
+     * @param client the client that is connected.
      * @param content the content for the deployment.
-     * @param name    the name of the deployment, if {@code null} the name of the content file is used.
-     * @param type    the deployment type.
-     *
+     * @param name the name of the deployment, if {@code null} the name of the content file is used.
+     * @param type the deployment type.
+     * @param replacementPattern the replacement pattern (old artifact name)
      * @return the new deployment
      */
-    public static StandaloneDeployment create(final ModelControllerClient client, final File content, final String name, final Type type) {
-        return new StandaloneDeployment(client, content, name, type);
+    public static StandaloneDeployment create(final ModelControllerClient client, final File content, final String name,
+                                              final String replacementPattern, final Type type) {
+        return new StandaloneDeployment(client, content, name, replacementPattern, type);
     }
 
     private DeploymentPlan createPlan(final DeploymentPlanBuilder builder) throws IOException {
@@ -90,16 +95,16 @@ public class StandaloneDeployment implements Deployment {
                 break;
             }
             case REDEPLOY: {
-                planBuilder = builder.replace(name, content).redeploy(name);
+                planBuilder = builder.replace(getDeploymentName(replacementPattern), content).redeploy(name);
                 break;
             }
             case UNDEPLOY: {
-                planBuilder = builder.undeploy(name).remove(name);
+                planBuilder = builder.undeploy(getDeploymentName(replacementPattern)).remove(name);
                 break;
             }
             case FORCE_DEPLOY: {
                 if (exists()) {
-                    planBuilder = builder.replace(name, content).redeploy(name);
+                    planBuilder = builder.replace(getDeploymentName(replacementPattern), content).redeploy(name);
                 } else {
                     planBuilder = builder.add(name, content).andDeploy();
                 }
@@ -107,7 +112,7 @@ public class StandaloneDeployment implements Deployment {
             }
             case UNDEPLOY_IGNORE_MISSING: {
                 if (exists()) {
-                    planBuilder = builder.undeploy(name).remove(name);
+                    planBuilder = builder.undeploy(getDeploymentName(replacementPattern)).remove(name);
                 } else {
                     return null;
                 }
@@ -116,6 +121,7 @@ public class StandaloneDeployment implements Deployment {
         }
         return planBuilder.build();
     }
+
 
     @Override
     public Status execute() throws DeploymentExecutionException, DeploymentFailureException {
@@ -159,6 +165,16 @@ public class StandaloneDeployment implements Deployment {
     }
 
     private boolean exists() {
+        String deploymentName = getDeploymentName(replacementPattern);
+        if (deploymentName != null) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private String getDeploymentName(String deploymentNamePattern) {
         // CLI :read-children-names(child-type=deployment)
         final ModelNode op = Operations.createListDeploymentsOperation();
         final ModelNode result;
@@ -169,8 +185,8 @@ public class StandaloneDeployment implements Deployment {
             if (Operations.successful(result)) {
                 final List<ModelNode> deployments = (result.hasDefined(Operations.RESULT) ? result.get(Operations.RESULT).asList() : Collections.<ModelNode>emptyList());
                 for (ModelNode n : deployments) {
-                    if (n.asString().equals(deploymentName)) {
-                        return true;
+                    if (n.asString().matches(deploymentNamePattern)) {
+                        return n.asString();
                     }
                 }
             } else {
@@ -179,6 +195,7 @@ public class StandaloneDeployment implements Deployment {
         } catch (IOException e) {
             throw new IllegalStateException(String.format("Could not execute operation '%s'", op), e);
         }
-        return false;
+        return null;
+
     }
 }
