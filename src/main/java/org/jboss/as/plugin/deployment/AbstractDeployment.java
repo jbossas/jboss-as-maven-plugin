@@ -82,6 +82,12 @@ abstract class AbstractDeployment extends AbstractServerConnection {
     private boolean skip;
 
     /**
+     * Pattern (Regex) of the Server-Artifact to replace/undeploy.
+     */
+    @Parameter(alias = "server-artifact-pattern")
+    private String serverArtifactPattern;
+
+    /**
      * The archive file.
      *
      * @return the archive file.
@@ -111,7 +117,8 @@ abstract class AbstractDeployment extends AbstractServerConnection {
         doExecute();
     }
 
-    protected final Status executeDeployment(final ModelControllerClient client, final Deployment deployment) throws DeploymentExecutionException, DeploymentFailureException, IOException {
+    protected final Status executeDeployment(final ModelControllerClient client, final Deployment deployment)
+            throws DeploymentExecutionException, DeploymentFailureException, IOException {
         // Execute before deployment commands
         if (beforeDeployment != null) beforeDeployment.execute(client);
         // Deploy the deployment
@@ -134,9 +141,10 @@ abstract class AbstractDeployment extends AbstractServerConnection {
                 final ModelControllerClient client = getClient();
                 final Deployment deployment;
                 if (isDomainServer()) {
-                    deployment = DomainDeployment.create((DomainClient) client, domain, file(), name, getType());
+                    deployment = DomainDeployment.create((DomainClient) client, domain, file(), name,
+                                                         serverArtifactPattern, getType());
                 } else {
-                    deployment = StandaloneDeployment.create(client, file(), name, getType());
+                    deployment = StandaloneDeployment.create(client, file(), name, serverArtifactPattern, getType());
                 }
                 switch (executeDeployment(client, deployment)) {
                     case REQUIRES_RESTART: {

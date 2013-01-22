@@ -59,40 +59,46 @@ public class DomainDeployment implements Deployment {
     private final Domain domain;
     private final String name;
     private final Type type;
+    private final String replacementPattern;
 
     /**
      * Creates a new deployment.
      *
-     * @param client  the client for the server
-     * @param domain  the domain information
+     * @param client the client for the server
+     * @param domain the domain information
      * @param content the content for the deployment
-     * @param name    the name of the deployment, if {@code null} the name of the content file is used
-     * @param type    the deployment type
+     * @param name the name of the deployment, if {@code null} the name of the content file is used
+     * @param type the deployment type
+     * @param replacementPattern the replacement pattern (old artifact name)
      */
-    public DomainDeployment(final DomainClient client, final Domain domain, final File content, final String name, final Type type) {
+    public DomainDeployment(final DomainClient client, final Domain domain, final File content, final String name,
+                            final String replacementPattern, final Type type) {
         this.content = content;
         this.client = client;
         this.domain = domain;
         this.name = (name == null ? content.getName() : name);
         this.type = type;
+        this.replacementPattern = (replacementPattern == null ? name : replacementPattern);
     }
 
     /**
      * Creates a new deployment.
      *
-     * @param client  the client for the server
-     * @param domain  the domain information
+     * @param client the client for the server
+     * @param domain the domain information
      * @param content the content for the deployment
-     * @param name    the name of the deployment, if {@code null} the name of the content file is used
-     * @param type    the deployment type
-     *
+     * @param name the name of the deployment, if {@code null} the name of the content file is used
+     * @param type the deployment type
+     * @param replacementPattern the replacement pattern (old artifact name)
      * @return the new deployment
      */
-    public static DomainDeployment create(final DomainClient client, final Domain domain, final File content, final String name, final Type type) {
-        return new DomainDeployment(client, domain, content, name, type);
+    public static DomainDeployment create(final DomainClient client, final Domain domain, final File content,
+                                          final String name, final String replacementPattern, final Type type) {
+        return new DomainDeployment(client, domain, content, name, replacementPattern, type);
     }
 
-    private DeploymentPlan createPlan(final DeploymentPlanBuilder builder) throws IOException, DuplicateDeploymentNameException, DeploymentFailureException {
+    private DeploymentPlan createPlan(final DeploymentPlanBuilder builder)
+            throws IOException, DuplicateDeploymentNameException, DeploymentFailureException {
         final boolean deploymentExists = exists();
         DeploymentActionsCompleteBuilder completeBuilder = null;
         switch (type) {
@@ -102,23 +108,23 @@ public class DomainDeployment implements Deployment {
             }
             case FORCE_DEPLOY: {
                 if (deploymentExists) {
-                    completeBuilder = builder.replace(name, content);
+                    completeBuilder = builder.replace(getDeploymentName(replacementPattern), content);
                 } else {
                     completeBuilder = builder.add(name, content).andDeploy();
                 }
                 break;
             }
             case REDEPLOY: {
-                completeBuilder = builder.replace(name, content);
+                completeBuilder = builder.replace(getDeploymentName(replacementPattern), content);
                 break;
             }
             case UNDEPLOY: {
-                completeBuilder = builder.undeploy(name).andRemoveUndeployed();
+                completeBuilder = builder.undeploy(getDeploymentName(replacementPattern)).andRemoveUndeployed();
                 break;
             }
             case UNDEPLOY_IGNORE_MISSING: {
                 if (deploymentExists) {
-                    completeBuilder = builder.undeploy(name).andRemoveUndeployed();
+                    completeBuilder = builder.undeploy(getDeploymentName(replacementPattern)).andRemoveUndeployed();
                 } else {
                     return null;
                 }
@@ -170,7 +176,7 @@ public class DomainDeployment implements Deployment {
                     ServerStatus currentStatus = statuses.get(serverId);
                     if (currentStatus != ServerStatus.STARTED) {
                         throw new DeploymentFailureException("Status of server group '%s' is '%s', but is required to be '%s'.",
-                                        serverGroup, currentStatus, ServerStatus.STARTED);
+                                                             serverGroup, currentStatus, ServerStatus.STARTED);
                     }
                     notFound = false;
                     break;
@@ -187,7 +193,8 @@ public class DomainDeployment implements Deployment {
         return type;
     }
 
-    private void executePlan(final DomainDeploymentManager manager, final DeploymentPlan plan) throws DeploymentExecutionException, ExecutionException, InterruptedException {
+    private void executePlan(final DomainDeploymentManager manager, final DeploymentPlan plan)
+            throws DeploymentExecutionException, ExecutionException, InterruptedException {
         if (plan.getDeploymentActions().size() > 0) {
             final DeploymentPlanResult planResult = manager.execute(plan).get();
             final Map<UUID, DeploymentActionResult> actionResults = planResult.getDeploymentActionResults();
@@ -206,7 +213,18 @@ public class DomainDeployment implements Deployment {
         }
     }
 
+
     private boolean exists() {
+        String deploymentName = getDeploymentName(replacementPattern);
+        if (deploymentName != null) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private String getDeploymentName(String deploymentNamePattern) {
+        // CLI :read-children-names(child-type=deployment)
         final ModelNode op = Operations.createListDeploymentsOperation();
         final ModelNode result;
         try {
@@ -216,8 +234,8 @@ public class DomainDeployment implements Deployment {
             if (Operations.successful(result)) {
                 final List<ModelNode> deployments = (result.hasDefined(Operations.RESULT) ? result.get(Operations.RESULT).asList() : Collections.<ModelNode>emptyList());
                 for (ModelNode n : deployments) {
-                    if (n.asString().equals(deploymentName)) {
-                        return true;
+                    if (n.asString().matches(deploymentNamePattern)) {
+                        return n.asString();
                     }
                 }
             } else {
@@ -226,6 +244,9 @@ public class DomainDeployment implements Deployment {
         } catch (IOException e) {
             throw new IllegalStateException(String.format("Could not execute operation '%s'", op), e);
         }
-        return false;
+        return null;
+
     }
+
+
 }
