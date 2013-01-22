@@ -42,7 +42,6 @@ import org.jboss.as.plugin.deployment.Deployment.Type;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "deploy", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
-@Execute(phase = LifecyclePhase.PACKAGE)
 public class Deploy extends AbstractAppDeployment {
 
     /**

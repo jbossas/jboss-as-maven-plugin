@@ -36,6 +36,7 @@ Adding Resources Examples
                         </goals>
                         <configuration>
                             <address>subsystem=datasources,data-source=java:jboss/myDs</address>
+                            <ifNotExists>subsystem=datasources,data-source=java:jboss/myDs</ifNotExists>
                             <resource>
                                 <enable-resource>true</enable-resource>
                                 <properties>
