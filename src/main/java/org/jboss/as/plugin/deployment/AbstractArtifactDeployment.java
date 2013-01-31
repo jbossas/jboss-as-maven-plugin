@@ -1,12 +1,20 @@
 package org.jboss.as.plugin.deployment;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -21,6 +29,19 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
+
+    /**
+     *
+     */
+    @Parameter(defaultValue = "${localRepository}", readonly = true)
+    private ArtifactRepository localRepository;
+
+
+    /**
+     *
+     */
+    @Parameter(defaultValue = "${project.remoteArtifactRepositories}", readonly = true, required = true)
+    private List<ArtifactRepository> pomRemoteRepositories;
 
     /**
      * The artifact to deploys groupId
@@ -58,17 +79,33 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
     @Component
     protected ArtifactFactory factory;
 
+    /**
+     *
+     */
+    @Component
+    private ArtifactResolver artifactResolver;
+
     private Artifact artifact;
 
     /**
      * The resolved dependency file
      */
+    @Parameter
     private File file;
 
     @Override
-    public void validate() throws DeploymentFailureException {
+    public void validate() throws DeploymentFailureException, MojoExecutionException, MojoFailureException {
 
         super.validate();
+
+        if (file == null) {
+            resolveArtifact();
+        } else if (!file.exists()) {
+            throw new DeploymentFailureException(String.format("File does not exist: %s", file.getName()));
+        }
+    }
+
+    private void resolveArtifact() throws DeploymentFailureException {
         if (getArtifactId() == null) {
             throw new DeploymentFailureException("must specify the artifactId");
         }
@@ -108,11 +145,30 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
                                                             getPackagingType(), getClassifier(),
                                                             Artifact.SCOPE_COMPILE);
             }
+
+
         }
 
         if (artifact == null) {
-            throw new DeploymentFailureException("Could not resolve artifact to deploy %s:%s:%s:%s", getGroupId(),
-                                                 getArtifactId(), getVersion());
+            throw new DeploymentFailureException(String.format("Could not resolve artifact to deploy %s:%s:%s:%s"),
+                                                 getGroupId(),
+                                                 getArtifactId(), getVersion(), getType());
+        }
+
+        if (artifact.getFile() == null) {
+            List<ArtifactRepository> repoList = new ArrayList<ArtifactRepository>();
+
+            if (pomRemoteRepositories != null) {
+                repoList.addAll(pomRemoteRepositories);
+            }
+
+            try {
+                artifactResolver.resolve(artifact, repoList, localRepository);
+            } catch (ArtifactResolutionException e) {
+                throw new DeploymentFailureException(e.getMessage(), e);
+            } catch (ArtifactNotFoundException e) {
+                throw new DeploymentFailureException(e.getMessage(), e);
+            }
         }
         file = artifact.getFile();
     }

@@ -99,7 +99,7 @@ public class StandaloneDeployment implements Deployment {
                 break;
             }
             case UNDEPLOY: {
-                planBuilder = builder.undeploy(getDeploymentName(replacementPattern)).remove(name);
+                planBuilder = builder.undeploy(getDeploymentName(replacementPattern)).remove(getDeploymentName(replacementPattern));
                 break;
             }
             case FORCE_DEPLOY: {
@@ -112,7 +112,7 @@ public class StandaloneDeployment implements Deployment {
             }
             case UNDEPLOY_IGNORE_MISSING: {
                 if (exists()) {
-                    planBuilder = builder.undeploy(getDeploymentName(replacementPattern)).remove(name);
+                    planBuilder = builder.undeploy(getDeploymentName(replacementPattern)).remove(getDeploymentName(replacementPattern));
                 } else {
                     return null;
                 }
@@ -134,27 +134,44 @@ public class StandaloneDeployment implements Deployment {
                 if (plan.getDeploymentActions().size() > 0) {
                     final ServerDeploymentPlanResult planResult = manager.execute(plan).get();
                     // Check the results
+
+                    boolean foundException = false;
+                    for (DeploymentAction action : plan.getDeploymentActions()) {
+                        final ServerDeploymentActionResult actionResult = planResult.getDeploymentActionResult(action.getId());
+                        if (actionResult.getDeploymentException() != null) {
+                            resultStatus = getStatus(resultStatus, actionResult);
+                        }
+                    }
+
                     for (DeploymentAction action : plan.getDeploymentActions()) {
                         final ServerDeploymentActionResult actionResult = planResult.getDeploymentActionResult(action.getId());
                         final ServerUpdateActionResult.Result result = actionResult.getResult();
-                        switch (result) {
-                            case FAILED:
-                                throw new DeploymentExecutionException("Deployment failed.", actionResult.getDeploymentException());
-                            case NOT_EXECUTED:
-                                throw new DeploymentExecutionException("Deployment not executed.", actionResult.getDeploymentException());
-                            case ROLLED_BACK:
-                                throw new DeploymentExecutionException("Deployment failed and was rolled back.", actionResult.getDeploymentException());
-                            case CONFIGURATION_MODIFIED_REQUIRES_RESTART:
-                                resultStatus = Status.REQUIRES_RESTART;
-                                break;
-                        }
+                        resultStatus = getStatus(resultStatus, actionResult);
                     }
+
                 }
             }
         } catch (DeploymentExecutionException e) {
             throw e;
         } catch (Exception e) {
             throw new DeploymentExecutionException(e, "Error executing %s", type);
+        }
+        return resultStatus;
+    }
+
+    private Status getStatus(Status resultStatus, ServerDeploymentActionResult actionResult)
+            throws DeploymentExecutionException {
+        final ServerUpdateActionResult.Result result = actionResult.getResult();
+        switch (result) {
+            case FAILED:
+                throw new DeploymentExecutionException("Deployment failed.", actionResult.getDeploymentException());
+            case NOT_EXECUTED:
+                throw new DeploymentExecutionException("Deployment not executed.", actionResult.getDeploymentException());
+            case ROLLED_BACK:
+                throw new DeploymentExecutionException("Deployment failed and was rolled back.", actionResult.getDeploymentException());
+            case CONFIGURATION_MODIFIED_REQUIRES_RESTART:
+                resultStatus = Status.REQUIRES_RESTART;
+                break;
         }
         return resultStatus;
     }
