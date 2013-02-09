@@ -51,6 +51,7 @@ import org.jboss.dmr.ModelNode;
  * </pre>
  * 
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
+ * @author <a href="mailto:heinz.wilming@akquinet.de">Heinz Wilming</a>
  */
 public class Commands {
 

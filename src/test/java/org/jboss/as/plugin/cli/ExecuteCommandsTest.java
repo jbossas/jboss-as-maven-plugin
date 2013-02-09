@@ -53,5 +53,4 @@ public class ExecuteCommandsTest extends AbstractItTestCase {
 
         assertEquals(600, timeout);
     }
-
 }
