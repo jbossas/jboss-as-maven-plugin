@@ -1,211 +1,272 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ JBoss, Home of Professional Open Source.
-  ~ Copyright 2010, Red Hat, Inc., and individual contributors
-  ~ as indicated by the @author tags. See the copyright.txt file in the
-  ~ distribution for a full listing of individual contributors.
-  ~
-  ~ This is free software; you can redistribute it and/or modify it
-  ~ under the terms of the GNU Lesser General Public License as
-  ~ published by the Free Software Foundation; either version 2.1 of
-  ~ the License, or (at your option) any later version.
-  ~
-  ~ This software is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  ~ Lesser General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU Lesser General Public
-  ~ License along with this software; if not, write to the Free
-  ~ Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-  ~ 02110-1301 USA, or see the FSF site: http://www.fsf.org.
-  -->
+<!-- ~ JBoss, Home of Professional Open Source. ~ Copyright 2010, Red Hat, 
+	Inc., and individual contributors ~ as indicated by the @author tags. See 
+	the copyright.txt file in the ~ distribution for a full listing of individual 
+	contributors. ~ ~ This is free software; you can redistribute it and/or modify 
+	it ~ under the terms of the GNU Lesser General Public License as ~ published 
+	by the Free Software Foundation; either version 2.1 of ~ the License, or 
+	(at your option) any later version. ~ ~ This software is distributed in the 
+	hope that it will be useful, ~ but WITHOUT ANY WARRANTY; without even the 
+	implied warranty of ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+	See the GNU ~ Lesser General Public License for more details. ~ ~ You should 
+	have received a copy of the GNU Lesser General Public ~ License along with 
+	this software; if not, write to the Free ~ Software Foundation, Inc., 51 
+	Franklin St, Fifth Floor, Boston, MA ~ 02110-1301 USA, or see the FSF site: 
+	http://www.fsf.org. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>jboss-parent</artifactId>
-        <groupId>org.jboss</groupId>
-        <version>9</version>
-    </parent>
-    <groupId>org.jboss.as.plugins</groupId>
-    <artifactId>jboss-as-maven-plugin</artifactId>
-    <version>7.4.Final-SNAPSHOT</version>
-    <packaging>maven-plugin</packaging>
-    <name>JBoss AS7 Deployment Plugin</name>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>jboss-parent</artifactId>
+		<groupId>org.jboss</groupId>
+		<version>9</version>
+	</parent>
+	<groupId>org.jboss.as.plugins</groupId>
+	<artifactId>jboss-as-maven-plugin</artifactId>
+	<version>7.4.Final-SNAPSHOT</version>
+	<packaging>maven-plugin</packaging>
+	<name>JBoss AS7 Deployment Plugin</name>
 
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/jbossas/jboss-as-maven-plugin/issues</url>
-    </issueManagement>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/jbossas/jboss-as-maven-plugin/issues</url>
+	</issueManagement>
 
-    <scm>
-        <connection>scm:git://github.com/jbossas/jboss-as-maven-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jbossas/jboss-as-maven-plugin.git</developerConnection>
-        <url>http://github.com/jbossas/jboss-as-maven-plugin</url>
-    </scm>
+	<scm>
+		<connection>scm:git://github.com/jbossas/jboss-as-maven-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:jbossas/jboss-as-maven-plugin.git</developerConnection>
+		<url>http://github.com/jbossas/jboss-as-maven-plugin</url>
+	</scm>
 
-    <licenses>
-        <license>
-            <name>lgpl</name>
-            <url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+	<licenses>
+		<license>
+			<name>lgpl</name>
+			<url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
 
-    <properties>
-        <version.junit.junit>4.11</version.junit.junit>
-        <version.org.jboss.as>7.1.2.Final</version.org.jboss.as>
-        <version.org.apache.maven.maven-plugin>2.2.1</version.org.apache.maven.maven-plugin>
-        <version.org.apache.maven.maven-settings>3.0.3</version.org.apache.maven.maven-settings>
-        <version.org.apache.maven.plugin-api>3.0.4</version.org.apache.maven.plugin-api>
-        <version.org.apache.maven.plugin-testing.maven-plugin-testing-harness>2.0-alpha-1</version.org.apache.maven.plugin-testing.maven-plugin-testing-harness>
-        <version.org.apache.maven.plugin-tools>3.1</version.org.apache.maven.plugin-tools>
-        <version.org.apache.maven.plugins.plugin>3.1</version.org.apache.maven.plugins.plugin>
-        <version.org.apache.maven.plugins.site-plugin>3.0</version.org.apache.maven.plugins.site-plugin>
-        <version.org.codehaus.plexus.plexus-utils>3.0.1</version.org.codehaus.plexus.plexus-utils>
-        <version.org.jboss.remoting3>3.2.12.GA</version.org.jboss.remoting3>
-        <version.org.mockito.mockito-all>1.9.0</version.org.mockito.mockito-all>
-        <version.org.sonatype.aether>1.8</version.org.sonatype.aether>
-    </properties>
+	<properties>
+		<version.junit.junit>4.11</version.junit.junit>
+		<version.org.jboss.as>7.1.2.Final</version.org.jboss.as>
+		<!-- JBoss AS 7.1.2 distribution artifact is not deployed to the jboss 
+			nexus repository -->
+		<version.org.jboss.as.dist>7.1.1.Final</version.org.jboss.as.dist>
+		<version.org.apache.maven.maven-plugin>2.2.1</version.org.apache.maven.maven-plugin>
+		<version.org.apache.maven.maven-settings>3.0.3</version.org.apache.maven.maven-settings>
+		<version.org.apache.maven.plugin-api>3.0.4</version.org.apache.maven.plugin-api>
+		<version.org.apache.maven.plugin-testing.maven-plugin-testing-harness>2.0-alpha-1</version.org.apache.maven.plugin-testing.maven-plugin-testing-harness>
+		<version.org.apache.maven.plugin-tools>3.1</version.org.apache.maven.plugin-tools>
+		<version.org.apache.maven.plugins.plugin>3.1</version.org.apache.maven.plugins.plugin>
+		<version.org.apache.maven.plugins.site-plugin>3.0</version.org.apache.maven.plugins.site-plugin>
+		<version.org.apache.maven.plugins.maven-dependency-plugin>2.6</version.org.apache.maven.plugins.maven-dependency-plugin>
+		<version.org.codehaus.plexus.plexus-utils>3.0.1</version.org.codehaus.plexus.plexus-utils>
+		<version.org.jboss.remoting3>3.2.12.GA</version.org.jboss.remoting3>
+		<version.org.mockito.mockito-all>1.9.0</version.org.mockito.mockito-all>
+		<version.org.sonatype.aether>1.8</version.org.sonatype.aether>
+		<version.org.jboss.arquillian>1.0.1.Final</version.org.jboss.arquillian>
+		<version.de.akquinet.needle>2.2</version.de.akquinet.needle>
+	</properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>${version.org.apache.maven.plugins.site-plugin}</version>
-                <configuration>
-                    <relativizeDecorationLinks>false</relativizeDecorationLinks>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>${version.org.apache.maven.plugins.plugin}</version>
-                <configuration>
-                    <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>mojo-descriptor</id>
-                        <goals>
-                            <goal>descriptor</goal>
-                        </goals>
-                    </execution>
-                    <!-- if you want to generate help goal -->
-                    <execution>
-                        <id>help-goal</id>
-                        <goals>
-                            <goal>helpmojo</goal>
-                        </goals>
-                        <configuration>
-                            <helpPackageName>org.jboss.as.plugin.generated</helpPackageName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>${version.org.apache.maven.plugins.site-plugin}</version>
+				<configuration>
+					<relativizeDecorationLinks>false</relativizeDecorationLinks>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>${version.org.apache.maven.plugins.plugin}</version>
+				<configuration>
+					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
+				</configuration>
+				<executions>
+					<execution>
+						<id>mojo-descriptor</id>
+						<goals>
+							<goal>descriptor</goal>
+						</goals>
+					</execution>
+					<!-- if you want to generate help goal -->
+					<execution>
+						<id>help-goal</id>
+						<goals>
+							<goal>helpmojo</goal>
+						</goals>
+						<configuration>
+							<helpPackageName>org.jboss.as.plugin.generated</helpPackageName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>${version.org.apache.maven.plugins.plugin}</version>
-            </plugin>
-        </plugins>
-    </reporting>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>${version.org.apache.maven.plugins.maven-dependency-plugin}</version>
+				<executions>
+					<execution>
+						<id>unpack-jboss</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-dist</artifactId>
+									<version>${version.org.jboss.as.dist}</version>
+									<type>zip</type>
+									<overWrite>false</overWrite>
+									<outputDirectory>target</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>${version.org.apache.maven.plugin-api}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-project</artifactId>
-            <version>${version.org.apache.maven.maven-plugin}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-api</artifactId>
-            <version>${version.org.sonatype.aether}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-util</artifactId>
-            <version>${version.org.sonatype.aether}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.as</groupId>
-            <artifactId>jboss-as-cli</artifactId>
-            <version>${version.org.jboss.as}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.as</groupId>
-            <artifactId>jboss-as-controller-client</artifactId>
-            <version>${version.org.jboss.as}</version>
-        </dependency>
-        <!--
-            This is only added as remoting 3 has some backwards compatibility issues when deploying to newer releases.
-            Remove this when AS version aligns the remoting version.
-         -->
-        <dependency>
-            <groupId>org.jboss.remoting3</groupId>
-            <artifactId>jboss-remoting</artifactId>
-            <version>${version.org.jboss.remoting3}</version>
-        </dependency>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							
+							<target>
+								<move file="target/jboss-as-${version.org.jboss.as.dist}" tofile="target/jboss-as"/>
+							</target>
 
-        <!-- dependencies to annotations -->
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>${version.org.apache.maven.plugin-tools}</version>
-        </dependency>
-        <!-- generated help mojo has a dependency to plexus-utils -->
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>${version.org.codehaus.plexus.plexus-utils}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${version.junit.junit}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-settings</artifactId>
-            <version>${version.org.apache.maven.maven-settings}</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven.plugin-testing</groupId>
-            <artifactId>maven-plugin-testing-harness</artifactId>
-            <version>${version.org.apache.maven.plugin-testing.maven-plugin-testing-harness}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-settings-builder</artifactId>
-            <version>${version.org.apache.maven.maven-settings}</version>
-            <type>jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${version.org.mockito.mockito-all}</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+						</configuration>
+						
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>${version.org.apache.maven.plugins.plugin}</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>${version.org.apache.maven.plugin-api}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-project</artifactId>
+			<version>${version.org.apache.maven.maven-plugin}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonatype.aether</groupId>
+			<artifactId>aether-api</artifactId>
+			<version>${version.org.sonatype.aether}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.sonatype.aether</groupId>
+			<artifactId>aether-util</artifactId>
+			<version>${version.org.sonatype.aether}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-cli</artifactId>
+			<version>${version.org.jboss.as}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-controller-client</artifactId>
+			<version>${version.org.jboss.as}</version>
+		</dependency>
+		<!-- This is only added as remoting 3 has some backwards compatibility 
+			issues when deploying to newer releases. Remove this when AS version aligns 
+			the remoting version. -->
+		<dependency>
+			<groupId>org.jboss.remoting3</groupId>
+			<artifactId>jboss-remoting</artifactId>
+			<version>${version.org.jboss.remoting3}</version>
+		</dependency>
+
+		<!-- dependencies to annotations -->
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>${version.org.apache.maven.plugin-tools}</version>
+		</dependency>
+		<!-- generated help mojo has a dependency to plexus-utils -->
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>${version.org.codehaus.plexus.plexus-utils}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${version.junit.junit}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-settings</artifactId>
+			<version>${version.org.apache.maven.maven-settings}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-testing</groupId>
+			<artifactId>maven-plugin-testing-harness</artifactId>
+			<version>${version.org.apache.maven.plugin-testing.maven-plugin-testing-harness}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-settings-builder</artifactId>
+			<version>${version.org.apache.maven.maven-settings}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>${version.org.mockito.mockito-all}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.arquillian.junit</groupId>
+			<artifactId>arquillian-junit-container</artifactId>
+			<version>${version.org.jboss.arquillian}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-arquillian-container-managed</artifactId>
+			<version>${version.org.jboss.as}</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 </project>

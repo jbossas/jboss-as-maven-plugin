@@ -152,6 +152,7 @@ public class Commands {
 
             } finally {
                 ctx.terminateSession();
+                ctx.bindClient(null);
             }
         }
 
