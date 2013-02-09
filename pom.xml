@@ -143,17 +143,13 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							
 							<target>
 								<move file="target/jboss-as-${version.org.jboss.as.dist}" tofile="target/jboss-as"/>
 							</target>
-
 						</configuration>
-						
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 
