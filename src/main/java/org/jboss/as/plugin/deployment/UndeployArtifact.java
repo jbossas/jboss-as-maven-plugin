@@ -40,8 +40,20 @@ import org.jboss.as.plugin.deployment.Deployment.Type;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "undeploy-artifact", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
-@Execute(phase = LifecyclePhase.PACKAGE)
 public final class UndeployArtifact extends AbstractArtifactDeployment {
+
+    /**
+     * The artifact to deploys groupId
+     */
+    @Parameter
+    private String groupId;
+
+
+    /**
+     * The artifact to deploys artifactId
+     */
+    @Parameter
+    private String artifactId;
 
     /**
      * Indicates whether undeploy should ignore the undeploy operation if the deployment does not exist.
