@@ -1,23 +1,23 @@
 /*
- * JBoss, Home of Professional Open Source. Copyright 2010, Red Hat, Inc., and
- * individual contributors as indicated by the @author tags. See the
- * copyright.txt file in the distribution for a full listing of individual
- * contributors.
- * 
- * This is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this software; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF
- * site: http://www.fsf.org.
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2013, Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
 package org.jboss.as.plugin.common;
@@ -41,7 +41,7 @@ import org.jboss.dmr.Property;
 
 /**
  * The default implementation for connecting to a running AS7 instance
- *
+ * 
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @author Stuart Douglas
  */
@@ -85,9 +85,8 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     @Parameter(defaultValue = "9999", property = "jboss-as.port")
     private int port;
 
-   /**
-     * Specifies the id of the server if the username and password is to be
-     * retrieved from the settings.xml file
+    /**
+     * Specifies the id of the server if the username and password is to be retrieved from the settings.xml file
      */
     @Parameter(property = "jboss-as.id")
     private String id;
@@ -101,8 +100,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     /**
      * Specifies the username to use if prompted to authenticate by the server.
      * <p/>
-     * If no username is specified and the server requests authentication the user will be prompted to supply the
-     * username,
+     * If no username is specified and the server requests authentication the user will be prompted to supply the username,
      */
     @Parameter(property = "jboss-as.username")
     private String username;
@@ -110,8 +108,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     /**
      * Specifies the password to use if prompted to authenticate by the server.
      * <p/>
-     * If no password is specified and the server requests authentication the user will be prompted to supply the
-     * password,
+     * If no password is specified and the server requests authentication the user will be prompted to supply the password,
      */
     @Parameter(property = "jboss-as.password")
     private String password;
@@ -120,7 +117,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
     /**
      * The hostname to deploy the archive to. The default is localhost.
-     *
+     * 
      * @return the hostname of the server.
      */
     public final String hostname() {
@@ -130,7 +127,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
     /**
      * The port number of the server to deploy to. The default is 9999.
-     *
+     * 
      * @return the port number to deploy to.
      */
     @Override
@@ -141,7 +138,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
     /**
      * Returns {@code true} if the connection is for a domain server, otherwise {@code false}.
-     *
+     * 
      * @return {@code true} if the connection is for a domain server, otherwise {@code false}
      */
     public final boolean isDomainServer() {
@@ -153,7 +150,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
     /**
      * The goal of the deployment.
-     *
+     * 
      * @return the goal of the deployment.
      */
     public abstract String goal();
@@ -162,7 +159,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
      * Gets or creates a new connection to the server and returns the client.
      * <p/>
      * For a domain server a {@link DomainClient} will be returned.
-     *
+     * 
      * @return the client
      */
     public final ModelControllerClient getClient() {
@@ -170,8 +167,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         synchronized (CLIENT_LOCK) {
             ModelControllerClient result = client;
             if (result == null) {
-                result = client = ModelControllerClient.Factory.create(getHostAddress(), getPort(),
-                                                                       getCallbackHandler());
+                result = client = ModelControllerClient.Factory.create(getHostAddress(), getPort(), getCallbackHandler());
                 if (isDomainServer(result)) {
                     result = client = DomainClient.Factory.create(result);
                 }
@@ -191,7 +187,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
     /**
      * Creates gets the address to the host name.
-     *
+     * 
      * @return the address.
      */
     @Override
@@ -214,8 +210,8 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
         CallbackHandler result = handler;
         if (result == null) {
-            if(username == null && password == null) {
-                if(id != null) {
+            if (username == null && password == null) {
+                if (id != null) {
                     getCredentialsFromSettings();
                 } else {
                     getLog().debug(DEBUG_MESSAGE_NO_ID);
@@ -229,13 +225,13 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     }
 
     private void getCredentialsFromSettings() {
-        if(settings != null) {
+        if (settings != null) {
             Server server = settings.getServer(id);
-            if(server != null) {
+            if (server != null) {
                 getLog().debug(DEBUG_MESSAGE_SETTINGS_HAS_ID);
                 password = server.getPassword();
                 username = server.getUsername();
-                if(username != null && password != null) {
+                if (username != null && password != null) {
                     getLog().debug(DEBUG_MESSAGE_SETTINGS_HAS_CREDS);
                 } else {
                     getLog().debug(DEBUG_MESSAGE_NO_CREDS);
@@ -259,7 +255,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
                 result = ("DOMAIN".equals(Operations.readResultAsString(opResult)));
             }
         } catch (IOException e) {
-            if ( getLog().isDebugEnabled() )
+            if (getLog().isDebugEnabled())
                 getLog().debug(e);
             throw new IllegalStateException(String.format("I/O Error could not execute operation '%s'", op), e);
         }
@@ -271,8 +267,8 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         if (ifExists != null || ifNotExists != null) {
 
             if (ifExists != null && ifNotExists != null) {
-                throw new IllegalStateException("Cannot use ifExists together with ifNotExists. Usage is exclusive " +
-                                                        "or do not use any of the fields.");
+                throw new IllegalStateException("Cannot use ifExists together with ifNotExists. Usage is exclusive "
+                        + "or do not use any of the fields.");
             }
 
             if (isDomainServer()) {
@@ -303,15 +299,14 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
     /**
      * Checks the existence of a resource. If the resource exists, {@code true} is returned, otherwise {@code false}.
-     *
+     * 
      * @param address the address of the resource to check.
      * @param client the client used to execute the operation.
      * @return {@code true} if the resources exists, otherwise {@code false}.
      * @throws IOException if an error occurs executing the operation.
      * @throws RuntimeException if the operation fails.
      */
-    protected boolean resourceExists(final ModelNode address, final ModelControllerClient client) throws
-            IOException {
+    protected boolean resourceExists(final ModelNode address, final ModelControllerClient client) throws IOException {
 
         final Property childAddress = Operations.getChildAddress(address);
         final ModelNode parentAddress = Operations.getParentAddress(address);
@@ -330,8 +325,8 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
             }
         }
 
-        getLog().debug(String.format("Check for Resource '%s' result '%b', node count %d", address.toString(), found,
-                                     childCount));
+        getLog().debug(
+                String.format("Check for Resource '%s' result '%b', node count %d", address.toString(), found, childCount));
 
         return found;
     }

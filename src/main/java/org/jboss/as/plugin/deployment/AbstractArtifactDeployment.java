@@ -35,8 +35,6 @@ import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -50,15 +48,17 @@ import org.jboss.as.plugin.common.DeploymentFailureException;
 public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 
     /**
-     *
+     * Used to look up Artifacts in the remote repository.
      */
+    @Component
+    protected ArtifactFactory factory;
+
+    @Component
+    private ArtifactResolver artifactResolver;
+
     @Parameter(defaultValue = "${localRepository}", readonly = true)
     private ArtifactRepository localRepository;
 
-
-    /**
-     *
-     */
     @Parameter(defaultValue = "${project.remoteArtifactRepositories}", readonly = true, required = true)
     private List<ArtifactRepository> pomRemoteRepositories;
 
@@ -91,18 +91,6 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
      */
     @Parameter(required = false)
     private String classifier;
-
-    /**
-     * Used to look up Artifacts in the remote repository.
-     */
-    @Component
-    protected ArtifactFactory factory;
-
-    /**
-     *
-     */
-    @Component
-    private ArtifactResolver artifactResolver;
 
     private Artifact artifact;
 
@@ -157,21 +145,18 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
             }
 
             if (StringUtils.isEmpty(getClassifier())) {
-                artifact = factory.createDependencyArtifact(getGroupId(), getArtifactId(), vr,
-                                                            getPackagingType(), null, Artifact.SCOPE_COMPILE);
+                artifact = factory.createDependencyArtifact(getGroupId(), getArtifactId(), vr, getPackagingType(), null,
+                        Artifact.SCOPE_COMPILE);
             } else {
-                artifact = factory.createDependencyArtifact(getGroupId(), getArtifactId(), vr,
-                                                            getPackagingType(), getClassifier(),
-                                                            Artifact.SCOPE_COMPILE);
+                artifact = factory.createDependencyArtifact(getGroupId(), getArtifactId(), vr, getPackagingType(),
+                        getClassifier(), Artifact.SCOPE_COMPILE);
             }
-
 
         }
 
         if (artifact == null) {
             throw new DeploymentFailureException(String.format("Could not resolve artifact to deploy %s:%s:%s:%s"),
-                                                 getGroupId(),
-                                                 getArtifactId(), getVersion(), getType());
+                    getGroupId(), getArtifactId(), getVersion(), getType());
         }
 
         if (artifact.getFile() == null) {
@@ -194,8 +179,7 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 
     private boolean matches(Artifact a) {
 
-        if (a.getArtifactId().equals(getArtifactId()) &&
-                a.getGroupId().equals(getVersion())) {
+        if (a.getArtifactId().equals(getArtifactId()) && a.getGroupId().equals(getVersion())) {
 
             boolean matchClassifier = false;
             boolean matchType = false;
@@ -313,7 +297,6 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 
         this.classifier = classifier;
     }
-
 
     @Override
     protected File file() {
