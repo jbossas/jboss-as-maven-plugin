@@ -27,9 +27,6 @@ import org.jboss.as.plugin.common.DeploymentFailureException;
  */
 public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
-    private MavenProject project;
-
     /**
      *
      */
@@ -265,11 +262,6 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
         return project;
     }
 
-    public void setProject(MavenProject project) {
-
-        this.project = project;
-    }
-
     public String getVersion() {
 
         return version;
@@ -299,6 +291,7 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 
         this.classifier = classifier;
     }
+
 
     @Override
     protected File file() {

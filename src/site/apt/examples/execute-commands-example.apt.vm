@@ -58,12 +58,10 @@ Execute Commands Examples
                  <artifactId>jboss-as-maven-plugin</artifactId>
                  <version>${project.version}</version>
                  <configuration>
-                     <ifNotExists>/subsystem=messaging,hornetq-server=default,jms-queue=myJmsQueue</ifNotExists>
+                     <ifNotExists>subsystem=messaging,hornetq-server=default,jms-queue=myJmsQueue</ifNotExists>
                      <execute-commands>
                          <commands>
-                             <command>/subsystem=messaging,hornetq-server=default,
-                                 jms-queue=myJmsQueue:add(durable=true, entries={"java:jboss/myJmsQueue",
-                                 "java:jboss/myJmsQueueAlias"})</command>
+                             <command>/subsystem=messaging/hornetq-server=default/jms-queue=myJmsQueue:add(durable=true, entries=["java:jboss/myJmsQueue", "java:jboss/myJmsQueueAlias"])</command>
                          </commands>
                      </execute-commands>
                  </configuration>
@@ -96,9 +94,8 @@ Execute Commands Examples
                      <ignoreFailure>true</ignoreFailure>
                      <execute-commands>
                          <commands>
-                             <command>/subsystem=messaging,hornetq-server=default,
-                                 jms-queue=myJmsQueue:add(durable=true, entries={"java:jboss/myJmsQueue",
-                                 "java:jboss/myJmsQueueAlias"})</command>
+                             <command>/subsystem=messaging/hornetq-server=default/jms-queue=myJmsQueue:misSpelled
+                                 (durable=true, entries=["java:jboss/myJmsQueue", "java:jboss/myJmsQueueAlias"])</command>
                          </commands>
                      </execute-commands>
                  </configuration>
@@ -129,7 +126,7 @@ Execute Commands Examples
                 <configuration>
                     <execute-commands>
                         <scripts>
-                            <script>config.cli</command>
+                            <script>config.cli</script>
                         </scripts>
                     </execute-commands>
                 </configuration>
