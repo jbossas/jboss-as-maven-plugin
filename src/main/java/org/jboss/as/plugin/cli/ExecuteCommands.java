@@ -97,7 +97,7 @@ public class ExecuteCommands extends AbstractServerConnection {
                 }
                 throw e;
             } finally {
-                Streams.safeClose(client);
+                close();
             }
         }
     }
