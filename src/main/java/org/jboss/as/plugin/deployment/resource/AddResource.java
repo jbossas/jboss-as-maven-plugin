@@ -36,7 +36,6 @@ import org.jboss.as.plugin.common.Operations;
 import org.jboss.as.plugin.common.Operations.CompositeOperationBuilder;
 import org.jboss.as.plugin.deployment.domain.Domain;
 import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.Property;
 
 /**
  * Adds a resource
@@ -199,7 +198,7 @@ public class AddResource extends AbstractServerConnection {
         if (inputAddress == null) {
             throw new RuntimeException("You must specify the address to deploy the resource to.");
         }
-        final ModelNode address = parseAddress(profileName, inputAddress);
+        final ModelNode address = Operations.parseAddress(profileName, inputAddress);
         if (checkExistence) {
             final boolean exists = resourceExists(address, client);
             if (resource.isAddIfAbsent() && exists) {

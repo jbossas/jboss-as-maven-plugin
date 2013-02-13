@@ -83,7 +83,6 @@ Deploy/Undeploy Examples
 
   It is also possible to deploy other artifacts that are not related to your deployment, e.g. database drivers:
 
-
 ----------
 <project>
     ...
@@ -118,9 +117,90 @@ Deploy/Undeploy Examples
 ----------
 
   The artifact must be already listed as a dependency in the projects pom.xml, otherwise you have to specify the
-         version (optional classifier and type). In case the dependency is not within your pom.xml,
-         it's fetched from the default repositories.
+  version (optional classifier and type). In case the dependency is not within your pom.xml,
+  it's fetched from the default repositories.
 
+* Deploying other artifacts using GroupId/ArtifactId/Version/Type/Classifier.
+
+  It is also possible to deploy other artifacts that are not directly referenced by your pom as dependency. You can
+  specify the GroupId/ArtifactId/Version/Type/Classifier
+
+----------
+<project>
+    ...
+    <build>
+        ...
+        <plugins>
+            ...
+            <plugin>
+                <groupId>org.jboss.as.plugins</groupId>
+                <artifactId>jboss-as-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>deploy-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>postgresql</groupId>
+                            <artifactId>postgresql</artifactId>
+                            <version>2.1.0</version>
+                            <type>jar</type>
+                            <name>postgresql.jar</name>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            ...
+        </plugins>
+        ...
+    </build>
+...
+</project>
+----------
+
+* Undeployments/Redeployments using Regex-Pattern.
+
+  You are allowed to perform Undeployments/Redeployments based on a regex-pattern. This is useful as soon as you use
+  a version identifier within your deployment name. An existing deployment is matched by regex and replaced by
+  the new one. This example below will replace the deployment starting with "postgres-".
+
+----------
+ <project>
+     ...
+     <build>
+         ...
+         <plugins>
+             ...
+             <plugin>
+                 <groupId>org.jboss.as.plugins</groupId>
+                 <artifactId>jboss-as-maven-plugin</artifactId>
+                 <version>${project.version}</version>
+                 <executions>
+                     <execution>
+                         <phase>install</phase>
+                         <goals>
+                             <goal>redeploy-artifact</goal>
+                         </goals>
+                         <configuration>
+                             <groupId>postgresql</groupId>
+                             <artifactId>postgresql</artifactId>
+                             <version>2.1.0</version>
+                             <type>jar</type>
+                             <name>postgresql-2.1.0.jar</name>
+                             <serverArtifactPattern>postgresql-.*</serverArtifactPattern>
+                         </configuration>
+                     </execution>
+                 </executions>
+             </plugin>
+             ...
+         </plugins>
+         ...
+     </build>
+ ...
+ </project>
+----------
 
 * Deploying your application in domain mode.
 

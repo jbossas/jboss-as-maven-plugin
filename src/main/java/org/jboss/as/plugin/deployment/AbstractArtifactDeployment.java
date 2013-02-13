@@ -64,7 +64,7 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
     /**
      * The artifact to deploys type
      */
-    @Parameter(required = false)
+    @Parameter(alias = "type", required = false)
     private String packagingType;
 
     /**
@@ -94,7 +94,7 @@ public abstract class AbstractArtifactDeployment extends AbstractDeployment {
     private File file;
 
     @Override
-    public void validate() throws DeploymentFailureException, MojoExecutionException, MojoFailureException {
+    public void validate() throws DeploymentFailureException {
 
         super.validate();
 

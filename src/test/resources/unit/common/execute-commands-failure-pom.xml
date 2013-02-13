@@ -13,10 +13,11 @@
                 <configuration>
                     <id>testid</id>
                     <port>10099</port>
-                    <ifExists>/subsystem=transactions</ifExists>
+                    <ignoreFailure>false</ignoreFailure>
                     <execute-commands>
                     	<commands>
-							<command>/subsystem=transactions :write-attribute(name=default-timeout, value=600)</command>
+							<command>/subsystem=aaatransactions :write-attribute(name=someAmbigousAttribute,
+                                value=600)</command>
 						</commands>
                     </execute-commands>
                 </configuration>

@@ -171,7 +171,7 @@ abstract class AbstractDeployment extends AbstractServerConnection {
      *
      * @throws DeploymentFailureException if the deployment is invalid.
      */
-    protected void validate() throws DeploymentFailureException, MojoExecutionException, MojoFailureException {
+    protected void validate() throws DeploymentFailureException {
         if (isDomainServer()) {
             if (domain == null || domain.getServerGroups().isEmpty()) {
                 throw new DeploymentFailureException("Server is running in domain mode, but no server groups have been defined.");

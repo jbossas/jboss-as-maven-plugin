@@ -200,6 +200,7 @@ public class Operations extends ClientConstants {
         if (address.getType() != ModelType.LIST) {
             throw new IllegalArgumentException("The address type must be a list.");
         }
+
         final List<Property> addressParts = address.asPropertyList();
         if (addressParts.isEmpty()) {
             throw new IllegalArgumentException("The address is empty.");
@@ -239,6 +240,30 @@ public class Operations extends ClientConstants {
      */
     public static String readResultAsString(final ModelNode result) {
         return (result.hasDefined(RESULT) ? result.get(RESULT).asString() : "");
+    }
+
+    /**
+     * Parses the comma delimited address into model nodes.
+     *
+     * @param profileName the profile name for the domain or {@code null} if not a domain
+     * @param inputAddress the address.
+     * @return a collection of the address nodes.
+     */
+    public static ModelNode parseAddress(final String profileName, final String inputAddress) {
+
+        final ModelNode result = new ModelNode();
+        if (profileName != null) {
+            result.add(PROFILE, profileName);
+        }
+        String[] parts = inputAddress.split(",");
+        for (String part : parts) {
+            String[] address = part.split("=");
+            if (address.length != 2) {
+                throw new RuntimeException(part + " is not a valid address segment");
+            }
+            result.add(address[0], address[1]);
+        }
+        return result;
     }
 
     /**

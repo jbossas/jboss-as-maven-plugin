@@ -18,11 +18,7 @@ public class ExecuteCommandsTest extends AbstractItTestCase {
 
         executeCommandsMojo.execute();
 
-        ModelNode operation = new ModelNode();
-        operation.get("operation").set("read-attribute");
-        operation.get("name").set("default-timeout");
-        ModelNode address = operation.get("address");
-        address.add("subsystem", "transactions");
+        ModelNode operation = getReadOperation();
 
         ModelNode result = execute(operation);
 
@@ -41,16 +37,42 @@ public class ExecuteCommandsTest extends AbstractItTestCase {
 
         executeCommandsMojo.execute();
 
-        ModelNode operation = new ModelNode();
-        operation.get("operation").set("read-attribute");
-        operation.get("name").set("default-timeout");
-        ModelNode address = operation.get("address");
-        address.add("subsystem", "transactions");
+        ModelNode operation = getReadOperation();
 
         ModelNode result = execute(operation);
 
         int timeout = result.get("result").asInt();
 
         assertEquals(600, timeout);
+    }
+
+    @Test
+    public void testExecuteCommandsIgnoreFailure() throws Exception {
+
+        File pom = getTestFile("src/test/resources/unit/common/execute-commands-ignore-failure-pom.xml");
+
+        Mojo executeCommandsMojo = lookupMojo("execute-commands", pom);
+
+        executeCommandsMojo.execute();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testExecuteCommandsWithFailure() throws Exception {
+
+        File pom = getTestFile("src/test/resources/unit/common/execute-commands-failure-pom.xml");
+
+        Mojo executeCommandsMojo = lookupMojo("execute-commands", pom);
+
+        executeCommandsMojo.execute();
+        //fail("Expected Exception.");
+    }
+
+    private ModelNode getReadOperation() {
+        ModelNode operation = new ModelNode();
+        operation.get("operation").set("read-attribute");
+        operation.get("name").set("default-timeout");
+        ModelNode address = operation.get("address");
+        address.add("subsystem", "transactions");
+        return operation;
     }
 }

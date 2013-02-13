@@ -31,7 +31,6 @@ import java.util.List;
 import javax.security.auth.callback.CallbackHandler;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
@@ -69,7 +68,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     private String hostname;
 
     /**
-     * Execute this Mojo if the given address exists.
+     * Execute this Mojo if the given address exist.
      */
     @Parameter(alias = "if-exists", property = "jboss-as.ifExists")
     private String ifExists;
@@ -282,7 +281,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
             }
             if (ifExists != null) {
                 getLog().debug(String.format("Check if exists: '%s'", ifExists));
-                ModelNode address = parseAddress(null, ifExists);
+                ModelNode address = Operations.parseAddress(null, ifExists);
                 if (resourceExists(address, client)) {
                     return true;
                 }
@@ -291,7 +290,7 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
 
             if (ifNotExists != null) {
                 getLog().debug(String.format("Check if not exists: '%s'", ifNotExists));
-                ModelNode address = parseAddress(null, ifNotExists);
+                ModelNode address = Operations.parseAddress(null, ifNotExists);
                 if (!resourceExists(address, client)) {
                     return true;
                 }
@@ -342,29 +341,5 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         if (!Operations.successful(result)) {
             throw new RuntimeException(Operations.getFailureDescription(result));
         }
-    }
-
-    /**
-     * Parses the comma delimited address into model nodes.
-     *
-     * @param profileName the profile name for the domain or {@code null} if not a domain
-     * @param inputAddress the address.
-     * @return a collection of the address nodes.
-     */
-    protected ModelNode parseAddress(final String profileName, final String inputAddress) {
-
-        final ModelNode result = new ModelNode();
-        if (profileName != null) {
-            result.add(Operations.PROFILE, profileName);
-        }
-        String[] parts = inputAddress.split(",");
-        for (String part : parts) {
-            String[] address = part.split("=");
-            if (address.length != 2) {
-                throw new RuntimeException(part + " is not a valid address segment");
-            }
-            result.add(address[0], address[1]);
-        }
-        return result;
     }
 }

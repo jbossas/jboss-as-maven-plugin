@@ -24,30 +24,16 @@ package org.jboss.as.plugin.deployment.domain;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import org.jboss.as.controller.client.helpers.domain.DeploymentActionResult;
-import org.jboss.as.controller.client.helpers.domain.DeploymentActionsCompleteBuilder;
-import org.jboss.as.controller.client.helpers.domain.DeploymentPlan;
-import org.jboss.as.controller.client.helpers.domain.DeploymentPlanBuilder;
-import org.jboss.as.controller.client.helpers.domain.DeploymentPlanResult;
-import org.jboss.as.controller.client.helpers.domain.DomainClient;
-import org.jboss.as.controller.client.helpers.domain.DomainDeploymentManager;
-import org.jboss.as.controller.client.helpers.domain.DuplicateDeploymentNameException;
-import org.jboss.as.controller.client.helpers.domain.ServerGroupDeploymentActionResult;
-import org.jboss.as.controller.client.helpers.domain.ServerGroupDeploymentPlanBuilder;
-import org.jboss.as.controller.client.helpers.domain.ServerIdentity;
-import org.jboss.as.controller.client.helpers.domain.ServerStatus;
-import org.jboss.as.controller.client.helpers.domain.ServerUpdateResult;
+import org.jboss.as.controller.client.helpers.domain.*;
 import org.jboss.as.plugin.common.DeploymentExecutionException;
 import org.jboss.as.plugin.common.DeploymentFailureException;
-import org.jboss.as.plugin.common.Operations;
+import org.jboss.as.plugin.common.DeploymentInspector;
 import org.jboss.as.plugin.deployment.Deployment;
-import org.jboss.dmr.ModelNode;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
@@ -63,7 +49,7 @@ public class DomainDeployment implements Deployment {
 
     /**
      * Creates a new deployment.
-     *
+     * 
      * @param client the client for the server
      * @param domain the domain information
      * @param content the content for the deployment
@@ -72,7 +58,7 @@ public class DomainDeployment implements Deployment {
      * @param replacementPattern the replacement pattern (old artifact name)
      */
     public DomainDeployment(final DomainClient client, final Domain domain, final File content, final String name,
-                            final String replacementPattern, final Type type) {
+            final String replacementPattern, final Type type) {
         this.content = content;
         this.client = client;
         this.domain = domain;
@@ -83,7 +69,7 @@ public class DomainDeployment implements Deployment {
 
     /**
      * Creates a new deployment.
-     *
+     * 
      * @param client the client for the server
      * @param domain the domain information
      * @param content the content for the deployment
@@ -93,12 +79,12 @@ public class DomainDeployment implements Deployment {
      * @return the new deployment
      */
     public static DomainDeployment create(final DomainClient client, final Domain domain, final File content,
-                                          final String name, final String replacementPattern, final Type type) {
+            final String name, final String replacementPattern, final Type type) {
         return new DomainDeployment(client, domain, content, name, replacementPattern, type);
     }
 
-    private DeploymentPlan createPlan(final DeploymentPlanBuilder builder)
-            throws IOException, DuplicateDeploymentNameException, DeploymentFailureException {
+    private DeploymentPlan createPlan(final DeploymentPlanBuilder builder) throws IOException,
+            DuplicateDeploymentNameException, DeploymentFailureException {
         final boolean deploymentExists = exists();
         DeploymentActionsCompleteBuilder completeBuilder = null;
         switch (type) {
@@ -108,23 +94,23 @@ public class DomainDeployment implements Deployment {
             }
             case FORCE_DEPLOY: {
                 if (deploymentExists) {
-                    completeBuilder = builder.replace(getDeploymentName(replacementPattern), content);
+                    completeBuilder = builder.replace(getDeploymentName(false), content);
                 } else {
                     completeBuilder = builder.add(name, content).andDeploy();
                 }
                 break;
             }
             case REDEPLOY: {
-                completeBuilder = builder.replace(getDeploymentName(replacementPattern), content);
+                completeBuilder = builder.replace(getDeploymentName(true), content);
                 break;
             }
             case UNDEPLOY: {
-                completeBuilder = builder.undeploy(getDeploymentName(replacementPattern)).andRemoveUndeployed();
+                completeBuilder = builder.undeploy(getDeploymentName(true)).andRemoveUndeployed();
                 break;
             }
             case UNDEPLOY_IGNORE_MISSING: {
                 if (deploymentExists) {
-                    completeBuilder = builder.undeploy(getDeploymentName(replacementPattern)).andRemoveUndeployed();
+                    completeBuilder = builder.undeploy(getDeploymentName(false)).andRemoveUndeployed();
                 } else {
                     return null;
                 }
@@ -133,8 +119,8 @@ public class DomainDeployment implements Deployment {
         if (completeBuilder != null) {
             ServerGroupDeploymentPlanBuilder groupDeploymentBuilder = null;
             for (String serverGroupName : domain.getServerGroups()) {
-                groupDeploymentBuilder = (groupDeploymentBuilder == null ? completeBuilder.toServerGroup(serverGroupName) :
-                        groupDeploymentBuilder.toServerGroup(serverGroupName));
+                groupDeploymentBuilder = (groupDeploymentBuilder == null ? completeBuilder.toServerGroup(serverGroupName)
+                        : groupDeploymentBuilder.toServerGroup(serverGroupName));
             }
             if (groupDeploymentBuilder == null) {
                 throw new DeploymentFailureException("No server groups were defined for the deployment.");
@@ -175,8 +161,9 @@ public class DomainDeployment implements Deployment {
                 if (serverGroup.equals(serverId.getServerGroupName())) {
                     ServerStatus currentStatus = statuses.get(serverId);
                     if (currentStatus != ServerStatus.STARTED) {
-                        throw new DeploymentFailureException("Status of server group '%s' is '%s', but is required to be '%s'.",
-                                                             serverGroup, currentStatus, ServerStatus.STARTED);
+                        throw new DeploymentFailureException(
+                                "Status of server group '%s' is '%s', but is required to be '%s'.", serverGroup, currentStatus,
+                                ServerStatus.STARTED);
                     }
                     notFound = false;
                     break;
@@ -199,9 +186,11 @@ public class DomainDeployment implements Deployment {
             final DeploymentPlanResult planResult = manager.execute(plan).get();
             final Map<UUID, DeploymentActionResult> actionResults = planResult.getDeploymentActionResults();
             for (UUID uuid : actionResults.keySet()) {
-                final Map<String, ServerGroupDeploymentActionResult> groupDeploymentActionResults = actionResults.get(uuid).getResultsByServerGroup();
+                final Map<String, ServerGroupDeploymentActionResult> groupDeploymentActionResults = actionResults.get(uuid)
+                        .getResultsByServerGroup();
                 for (String serverGroup2 : groupDeploymentActionResults.keySet()) {
-                    final Map<String, ServerUpdateResult> serverUpdateResults = groupDeploymentActionResults.get(serverGroup2).getResultByServer();
+                    final Map<String, ServerUpdateResult> serverUpdateResults = groupDeploymentActionResults.get(serverGroup2)
+                            .getResultByServer();
                     for (String server : serverUpdateResults.keySet()) {
                         final Throwable t = serverUpdateResults.get(server).getFailureResult();
                         if (t != null) {
@@ -213,40 +202,21 @@ public class DomainDeployment implements Deployment {
         }
     }
 
-
     private boolean exists() {
-        String deploymentName = getDeploymentName(replacementPattern);
+
+        String deploymentName = getDeploymentName(false);
         if (deploymentName != null) {
             return true;
         }
         return false;
     }
 
-
-    private String getDeploymentName(String deploymentNamePattern) {
-        // CLI :read-children-names(child-type=deployment)
-        final ModelNode op = Operations.createListDeploymentsOperation();
-        final ModelNode result;
-        try {
-            result = client.execute(op);
-            final String deploymentName = name;
-            // Check to make sure there is an outcome
-            if (Operations.successful(result)) {
-                final List<ModelNode> deployments = (result.hasDefined(Operations.RESULT) ? result.get(Operations.RESULT).asList() : Collections.<ModelNode>emptyList());
-                for (ModelNode n : deployments) {
-                    if (n.asString().matches(deploymentNamePattern)) {
-                        return n.asString();
-                    }
-                }
-            } else {
-                throw new IllegalStateException(Operations.getFailureDescription(result));
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException(String.format("Could not execute operation '%s'", op), e);
+    private String getDeploymentName(boolean returnNameIfNotFound) {
+        String nameOfExistingDeployment = DeploymentInspector.getDeploymentName(client, name, replacementPattern);
+        if (returnNameIfNotFound && nameOfExistingDeployment == null) {
+            return name;
         }
-        return null;
-
+        return nameOfExistingDeployment;
     }
-
 
 }

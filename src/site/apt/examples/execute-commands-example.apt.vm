@@ -26,7 +26,6 @@ Execute Commands Examples
                 <artifactId>jboss-as-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <configuration>
-                    <ifExists>subsystem=datasources,data-source=java:jboss/myDs</ifExists>
                     <execute-commands>
                         <commands>
                             <command>/subsystem=logging/file-handler=debug:add(level=DEBUG,autoflush=true,file={"relative-to"=>"jboss.server.log.dir", "path"=>"debug.log"})</command>
@@ -41,6 +40,75 @@ Execute Commands Examples
     </build>
 ...
 </project>
+----------
+
+* Execute commands with condition
+
+  The example below shows how to Queue only if it does not exist already:
+
+----------
+ <project>
+     ...
+     <build>
+         ...
+         <plugins>
+             ...
+             <plugin>
+                 <groupId>org.jboss.as.plugins</groupId>
+                 <artifactId>jboss-as-maven-plugin</artifactId>
+                 <version>${project.version}</version>
+                 <configuration>
+                     <ifNotExists>/subsystem=messaging,hornetq-server=default,jms-queue=myJmsQueue</ifNotExists>
+                     <execute-commands>
+                         <commands>
+                             <command>/subsystem=messaging,hornetq-server=default,
+                                 jms-queue=myJmsQueue:add(durable=true, entries={"java:jboss/myJmsQueue",
+                                 "java:jboss/myJmsQueueAlias"})</command>
+                         </commands>
+                     </execute-commands>
+                 </configuration>
+             </plugin>
+             ...
+         </plugins>
+         ...
+     </build>
+ ...
+ </project>
+----------
+
+* Execute commands (failsafe)
+
+  The example below ignores failures which can occur while executing CLI commands. The maven build fails usually in
+  case of failures. Using the <ignoreFailure> switch you can change this behaviour.
+
+----------
+ <project>
+     ...
+     <build>
+         ...
+         <plugins>
+             ...
+             <plugin>
+                 <groupId>org.jboss.as.plugins</groupId>
+                 <artifactId>jboss-as-maven-plugin</artifactId>
+                 <version>${project.version}</version>
+                 <configuration>
+                     <ignoreFailure>true</ignoreFailure>
+                     <execute-commands>
+                         <commands>
+                             <command>/subsystem=messaging,hornetq-server=default,
+                                 jms-queue=myJmsQueue:add(durable=true, entries={"java:jboss/myJmsQueue",
+                                 "java:jboss/myJmsQueueAlias"})</command>
+                         </commands>
+                     </execute-commands>
+                 </configuration>
+             </plugin>
+             ...
+         </plugins>
+         ...
+     </build>
+ ...
+ </project>
 ----------
 
 * Execute commands from CLI scripts
@@ -75,8 +143,8 @@ Execute Commands Examples
 ----------
 
   Example of a CLI script to set the transaction timeout to 600 seconds.
-  
-----------
+
++---------
 batch
 #set default transaction timeout
 /subsystem=transactions :write-attribute(name=default-timeout, value=600)
@@ -84,4 +152,4 @@ batch
 # Execute and reload
 run-batch
 :reload
-----------
++---------

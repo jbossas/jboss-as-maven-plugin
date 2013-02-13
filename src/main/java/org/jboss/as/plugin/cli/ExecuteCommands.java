@@ -60,7 +60,7 @@ public class ExecuteCommands extends AbstractServerConnection {
     /**
      * Fail Mojo if command fails.
      */
-    @Parameter(alias = "ignore-failure")
+    @Parameter(alias = "ignore-failure", property = "executeCommands.ignoreFailure")
     private boolean ignoreFailure;
 
     @Override
@@ -87,6 +87,7 @@ public class ExecuteCommands extends AbstractServerConnection {
                     getLog().error(e.toString());
                     return;
                 }
+                throw new MojoFailureException("Could not execute commands.", e);
             } catch (RuntimeException e) {
                 if (ignoreFailure) {
                     getLog().error(e.toString());
