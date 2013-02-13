@@ -22,21 +22,14 @@
 
 package org.jboss.as.plugin.deployment;
 
-import java.io.File;
-import java.util.Set;
-
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugins.annotations.Execute;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.jboss.as.plugin.common.DeploymentFailureException;
 import org.jboss.as.plugin.deployment.Deployment.Type;
 
 /**
  * Undeploys (removes) an arbitrary artifact to the JBoss application server
- *
+ * 
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "undeploy-artifact", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
@@ -47,7 +40,6 @@ public final class UndeployArtifact extends AbstractArtifactDeployment {
      */
     @Parameter
     private String groupId;
-
 
     /**
      * The artifact to deploys artifactId

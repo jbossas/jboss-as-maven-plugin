@@ -42,8 +42,8 @@ import org.codehaus.plexus.util.StringUtils;
 import org.jboss.as.plugin.common.DeploymentFailureException;
 
 /**
+ * Abstraction for GAV-based artifact deployments.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 22.01.13 10:41
  */
 public abstract class AbstractArtifactDeployment extends AbstractDeployment {
 

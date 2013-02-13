@@ -135,7 +135,7 @@ abstract class AbstractDeployment extends AbstractServerConnection {
      *
      * @see #execute()
      */
-    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+    protected void doExecute() throws MojoExecutionException {
         try {
             synchronized (CLIENT_LOCK) {
                 validate();
@@ -156,10 +156,6 @@ abstract class AbstractDeployment extends AbstractServerConnection {
                         break;
                 }
             }
-        } catch (MojoFailureException e) {
-            throw e;
-        } catch (MojoExecutionException e) {
-            throw e;
         } catch (Exception e) {
             throw new MojoExecutionException(String.format("Could not execute goal %s on %s. Reason: %s", goal(), file(), e.getMessage()), e);
         } finally {

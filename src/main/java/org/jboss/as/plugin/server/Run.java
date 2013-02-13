@@ -139,7 +139,7 @@ public class Run extends Deploy {
     private long startupTimeout;
 
     @Override
-    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+    protected void doExecute() throws MojoExecutionException {
         final Log log = getLog();
         final File deploymentFile = file();
         final String deploymentName = deploymentFile.getName();
@@ -218,7 +218,7 @@ public class Run extends Deploy {
 
     }
 
-    private File extractIfRequired(final File buildDir) throws MojoFailureException, MojoExecutionException {
+    private File extractIfRequired(final File buildDir) throws MojoExecutionException {
         if (jbossHome != null) {
             //we do not need to download JBoss
             return new File(jbossHome);
