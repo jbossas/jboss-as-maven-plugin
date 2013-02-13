@@ -30,8 +30,8 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 
 /**
+ * Utility to lookup up Deployments.
  * @author <a href="mailto:mpaluch@paluch.biz">Mark Paluch</a>
- * @since 13.02.13 07:36
  */
 public class DeploymentInspector {
 
@@ -43,7 +43,7 @@ public class DeploymentInspector {
     }
 
     /**
-     * Lookup an exsiting Deployment using a static name or a pattern. At least deploymentName or
+     * Lookup an existing Deployment using a static name or a pattern. At least deploymentName or
      * deploymentNamePattern must be set.
      * @param client
      * @param deploymentName Name for exact matching.
