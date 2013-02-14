@@ -36,18 +36,6 @@ import org.jboss.as.plugin.deployment.Deployment.Type;
 public final class UndeployArtifact extends AbstractArtifactDeployment {
 
     /**
-     * The artifact to deploys groupId
-     */
-    @Parameter
-    private String groupId;
-
-    /**
-     * The artifact to deploys artifactId
-     */
-    @Parameter
-    private String artifactId;
-
-    /**
      * Indicates whether undeploy should ignore the undeploy operation if the deployment does not exist.
      */
     @Parameter(defaultValue = "true", property = "undeploy.ignoreMissingDeployment")
