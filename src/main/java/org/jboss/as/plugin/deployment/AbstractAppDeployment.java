@@ -25,7 +25,6 @@ package org.jboss.as.plugin.deployment;
 import java.io.File;
 
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
@@ -61,7 +60,7 @@ abstract class AbstractAppDeployment extends AbstractDeployment {
     private PackageType packageType;
 
     @Override
-    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+    protected void doExecute() throws MojoExecutionException {
         final PackageType packageType = getPackageType();
         if (checkPackaging && packageType.isIgnored()) {
             getLog().debug(String.format("Ignoring packaging type %s.", packageType.getPackaging()));

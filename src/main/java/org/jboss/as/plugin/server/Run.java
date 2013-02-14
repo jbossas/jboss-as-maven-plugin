@@ -117,7 +117,7 @@ public class Run extends Deploy {
      * A space delimited list of JVM arguments.
      */
     @Parameter(alias = "jvm-args", property = "jboss-as.jvmArgs",
-            defaultValue = "-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000")
+               defaultValue = "-Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000")
     private String jvmArgs;
 
     /**
@@ -139,7 +139,7 @@ public class Run extends Deploy {
     private long startupTimeout;
 
     @Override
-    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+    protected void doExecute() throws MojoExecutionException {
         final Log log = getLog();
         final File deploymentFile = file();
         final String deploymentName = deploymentFile.getName();
@@ -196,7 +196,8 @@ public class Run extends Deploy {
             if (server.isRunning()) {
                 log.info(String.format("Deploying application '%s'%n", deploymentFile.getName()));
                 final ModelControllerClient client = server.getClient();
-                final Deployment deployment = StandaloneDeployment.create(client, deploymentFile, deploymentName, getType());
+                final Deployment deployment = StandaloneDeployment.create(client, deploymentFile, deploymentName,
+                                                                          null, getType());
                 switch (executeDeployment(client, deployment)) {
                     case REQUIRES_RESTART: {
                         client.execute(Operations.createOperation(Operations.RELOAD));
@@ -217,7 +218,7 @@ public class Run extends Deploy {
 
     }
 
-    private File extractIfRequired(final File buildDir) throws MojoFailureException, MojoExecutionException {
+    private File extractIfRequired(final File buildDir) throws MojoExecutionException {
         if (jbossHome != null) {
             //we do not need to download JBoss
             return new File(jbossHome);

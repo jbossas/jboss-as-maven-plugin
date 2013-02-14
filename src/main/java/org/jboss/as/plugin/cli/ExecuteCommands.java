@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2012, Red Hat, Inc., and individual contributors
+ * Copyright 2013, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -30,6 +30,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.plugin.common.AbstractServerConnection;
+import org.jboss.as.plugin.common.Streams;
 
 /**
  * Execute commands to the running JBoss Application Server.
@@ -37,6 +38,7 @@ import org.jboss.as.plugin.common.AbstractServerConnection;
  * Commands should be formatted in the same manor CLI commands are formatted.
  * <p/>
  * Executing commands in a batch will rollback all changes if one command fails.
+ * 
  * <pre>
  *      &lt;execute-commands&gt;
  *          &lt;batch&gt;true&lt;/batch&gt;
@@ -45,7 +47,7 @@ import org.jboss.as.plugin.common.AbstractServerConnection;
  *          &lt;/commands&gt;
  *      &lt;/execute-commands&gt;
  * </pre>
- *
+ * 
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "execute-commands", threadSafe = true)
@@ -57,6 +59,12 @@ public class ExecuteCommands extends AbstractServerConnection {
     @Parameter(alias = "execute-commands", required = true)
     private Commands executeCommands;
 
+    /**
+     * Fail Mojo if command fails.
+     */
+    @Parameter(alias = "ignore-failure", property = "execute-commands.ignoreFailure")
+    private boolean ignoreFailure;
+
     @Override
     public String goal() {
         return "execute-commands";
@@ -64,13 +72,30 @@ public class ExecuteCommands extends AbstractServerConnection {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+
         getLog().debug("Executing commands");
         synchronized (CLIENT_LOCK) {
             final ModelControllerClient client = getClient();
+
             try {
+                if (!checkPreconditions()) {
+                    getLog().info("Preconditions not met, skipping execution.");
+                    return;
+                }
+
                 executeCommands.execute(client);
             } catch (IOException e) {
+                if (ignoreFailure) {
+                    getLog().error(e.toString());
+                    return;
+                }
                 throw new MojoFailureException("Could not execute commands.", e);
+            } catch (RuntimeException e) {
+                if (ignoreFailure) {
+                    getLog().error(e.toString());
+                    return;
+                }
+                throw e;
             } finally {
                 close();
             }

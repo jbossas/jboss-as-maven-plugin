@@ -36,6 +36,7 @@ Adding Resources Examples
                         </goals>
                         <configuration>
                             <address>subsystem=datasources,data-source=java:jboss/myDs</address>
+                            <ifNotExists>subsystem=datasources,data-source=java:jboss/myDs</ifNotExists>
                             <resource>
                                 <enable-resource>true</enable-resource>
                                 <properties>
@@ -62,7 +63,8 @@ Adding Resources Examples
 ----------
 
   The example below shows how to configure a postgresql XA data source, including deploying the driver. The postgresql
-  driver module must be listed in the <dependencies> section of the pom.
+  driver module must be listed in the <dependencies> section of the pom. In case the postgresql driver is not a
+  dependency of the pom, you have to specify the version.
 
 ----------
 <project>

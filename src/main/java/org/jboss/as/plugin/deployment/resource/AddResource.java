@@ -36,7 +36,6 @@ import org.jboss.as.plugin.common.Operations;
 import org.jboss.as.plugin.common.Operations.CompositeOperationBuilder;
 import org.jboss.as.plugin.deployment.domain.Domain;
 import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.Property;
 
 /**
  * Adds a resource
@@ -120,6 +119,13 @@ public class AddResource extends AbstractServerConnection {
             getLog().info(String.format("Executing goal %s on server %s (%s) port %s.", goal(), host.getHostName(), host.getHostAddress(), getPort()));
             synchronized (CLIENT_LOCK) {
                 final ModelControllerClient client = getClient();
+
+                if(!checkPreconditions())
+                {
+                    getLog().info("Preconditions not met, skipping execution.");
+                    return;
+                }
+
                 if (resources == null) {
                     final Resource resource = (this.resource == null ? new Resource(address, properties, false) : this.resource);
                     processResources(client, resource);
@@ -192,7 +198,7 @@ public class AddResource extends AbstractServerConnection {
         if (inputAddress == null) {
             throw new RuntimeException("You must specify the address to deploy the resource to.");
         }
-        final ModelNode address = parseAddress(profileName, inputAddress);
+        final ModelNode address = Operations.parseAddress(profileName, inputAddress);
         if (checkExistence) {
             final boolean exists = resourceExists(address, client);
             if (resource.isAddIfAbsent() && exists) {
@@ -256,33 +262,7 @@ public class AddResource extends AbstractServerConnection {
         return op;
     }
 
-    /**
-     * Checks the existence of a resource. If the resource exists, {@code true} is returned, otherwise {@code false}.
-     *
-     * @param address the address of the resource to check.
-     * @param client  the client used to execute the operation.
-     *
-     * @return {@code true} if the resources exists, otherwise {@code false}.
-     *
-     * @throws IOException      if an error occurs executing the operation.
-     * @throws RuntimeException if the operation fails.
-     */
-    private boolean resourceExists(final ModelNode address, final ModelControllerClient client) throws IOException {
-        final Property childAddress = Operations.getChildAddress(address);
-        final ModelNode parentAddress = Operations.getParentAddress(address);
-        final ModelNode r = client.execute(Operations.createOperation(Operations.READ_RESOURCE, parentAddress, false));
-        reportFailure(r);
-        boolean found = false;
-        final String name = childAddress.getName();
-        if (r.get(Operations.RESULT).get(name).isDefined()) {
-            for (ModelNode dataSource : r.get(Operations.RESULT).get(name).asList()) {
-                if (dataSource.asProperty().getName().equals(childAddress.getValue().asString())) {
-                    found = true;
-                }
-            }
-        }
-        return found;
-    }
+
 
     /**
      * Handles DMR strings in the configuration
@@ -296,33 +276,7 @@ public class AddResource extends AbstractServerConnection {
         node.get(name).set(ModelNode.fromString(realValue));
     }
 
-    /**
-     * Parses the comma delimited address into model nodes.
-     *
-     * @param profileName  the profile name for the domain or {@code null} if not a domain
-     * @param inputAddress the address.
-     *
-     * @return a collection of the address nodes.
-     */
-    private ModelNode parseAddress(final String profileName, final String inputAddress) {
-        final ModelNode result = new ModelNode();
-        if (profileName != null) {
-            result.add(Operations.PROFILE, profileName);
-        }
-        String[] parts = inputAddress.split(",");
-        for (String part : parts) {
-            String[] address = part.split("=");
-            if (address.length != 2) {
-                throw new RuntimeException(part + " is not a valid address segment");
-            }
-            result.add(address[0], address[1]);
-        }
-        return result;
-    }
 
-    private void reportFailure(final ModelNode result) {
-        if (!Operations.successful(result)) {
-            throw new RuntimeException(Operations.getFailureDescription(result));
-        }
-    }
+
+
 }

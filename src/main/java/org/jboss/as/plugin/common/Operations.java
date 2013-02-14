@@ -55,7 +55,6 @@ public class Operations extends ClientConstants {
      * Checks the result for a successful operation.
      *
      * @param result the result of executing an operation
-     *
      * @return {@code true} if the operation was successful, otherwise {@code false}
      */
     public static boolean successful(final ModelNode result) {
@@ -67,7 +66,6 @@ public class Operations extends ClientConstants {
      * returned.
      *
      * @param result the result of executing an operation
-     *
      * @return the failure message or an empty string
      */
     public static String getFailureDescription(final ModelNode result) {
@@ -91,7 +89,6 @@ public class Operations extends ClientConstants {
      * Creates an add operation.
      *
      * @param address the address for the operation
-     *
      * @return the operation
      */
     public static ModelNode createAddOperation(final ModelNode address) {
@@ -102,7 +99,6 @@ public class Operations extends ClientConstants {
      * Creates a remove operation.
      *
      * @param address the address for the operation
-     *
      * @return the operation
      */
     public static ModelNode createRemoveOperation(final ModelNode address, final boolean recursive) {
@@ -138,7 +134,6 @@ public class Operations extends ClientConstants {
      * Creates an operation to read the attribute represented by the {@code attributeName} parameter.
      *
      * @param attributeName the name of the parameter to read
-     *
      * @return the operation
      */
     public static ModelNode createReadAttributeOperation(final String attributeName) {
@@ -153,7 +148,6 @@ public class Operations extends ClientConstants {
      * Creates a generic operation with no address.
      *
      * @param operation the operation to create
-     *
      * @return the operation
      */
     public static ModelNode createOperation(final String operation) {
@@ -167,18 +161,16 @@ public class Operations extends ClientConstants {
      * Creates an operation.
      *
      * @param operation the operation name
-     * @param address   the address for the operation
-     *
+     * @param address the address for the operation
      * @return the operation
-     *
-     * @throws IllegalArgumentException if the address is not of type {@link ModelType#LIST}
      */
     public static ModelNode createOperation(final String operation, final ModelNode address) {
-        if (address.getType() != ModelType.LIST) {
-            throw new IllegalArgumentException("The address type must be a list.");
-        }
+
         final ModelNode op = createOperation(operation);
-        op.get(OP_ADDR).set(address);
+
+        if (address.getType() == ModelType.LIST) {
+            op.get(OP_ADDR).set(address);
+        }
         return op;
     }
 
@@ -186,11 +178,9 @@ public class Operations extends ClientConstants {
      * Creates an operation.
      *
      * @param operation the operation name
-     * @param address   the address for the operation
+     * @param address the address for the operation
      * @param recursive whether the operation is recursive or not
-     *
      * @return the operation
-     *
      * @throws IllegalArgumentException if the address is not of type {@link ModelType#LIST}
      */
     public static ModelNode createOperation(final String operation, final ModelNode address, final boolean recursive) {
@@ -203,15 +193,14 @@ public class Operations extends ClientConstants {
      * Finds the last entry of the address list and returns it as a property.
      *
      * @param address the address to get the last part of
-     *
      * @return the last part of the address
-     *
      * @throws IllegalArgumentException if the address is not of type {@link ModelType#LIST} or is empty
      */
     public static Property getChildAddress(final ModelNode address) {
         if (address.getType() != ModelType.LIST) {
             throw new IllegalArgumentException("The address type must be a list.");
         }
+
         final List<Property> addressParts = address.asPropertyList();
         if (addressParts.isEmpty()) {
             throw new IllegalArgumentException("The address is empty.");
@@ -223,9 +212,7 @@ public class Operations extends ClientConstants {
      * Finds the parent address, everything before the last address part.
      *
      * @param address the address to get the parent
-     *
      * @return the parent address
-     *
      * @throws IllegalArgumentException if the address is not of type {@link ModelType#LIST} or is empty
      */
     public static ModelNode getParentAddress(final ModelNode address) {
@@ -249,11 +236,34 @@ public class Operations extends ClientConstants {
      * #RESULT} attribute and empty string is returned.
      *
      * @param result the result of executing an operation
-     *
      * @return the result of the operation or an empty string
      */
     public static String readResultAsString(final ModelNode result) {
         return (result.hasDefined(RESULT) ? result.get(RESULT).asString() : "");
+    }
+
+    /**
+     * Parses the comma delimited address into model nodes.
+     *
+     * @param profileName the profile name for the domain or {@code null} if not a domain
+     * @param inputAddress the address.
+     * @return a collection of the address nodes.
+     */
+    public static ModelNode parseAddress(final String profileName, final String inputAddress) {
+
+        final ModelNode result = new ModelNode();
+        if (profileName != null) {
+            result.add(PROFILE, profileName);
+        }
+        String[] parts = inputAddress.split(",");
+        for (String part : parts) {
+            String[] address = part.split("=");
+            if (address.length != 2) {
+                throw new RuntimeException(part + " is not a valid address segment");
+            }
+            result.add(address[0], address[1]);
+        }
+        return result;
     }
 
     /**
@@ -290,11 +300,10 @@ public class Operations extends ClientConstants {
         /**
          * Adds a new operation to the composite operation.
          * <p/>
-         * Note that subsequent calls after a {@link #build() build} invocation will result the operation being
-         * appended to.
+         * Note that subsequent calls after a {@link #build() build} invocation will result the operation being appended
+         * to.
          *
          * @param op the operation to add
-         *
          * @return the current builder
          */
         public CompositeOperationBuilder addStep(final ModelNode op) {

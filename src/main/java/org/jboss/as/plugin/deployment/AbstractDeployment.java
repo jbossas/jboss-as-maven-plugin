@@ -27,6 +27,7 @@ import java.io.IOException;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.jboss.as.controller.client.ModelControllerClient;
@@ -48,7 +49,7 @@ import org.jboss.as.plugin.deployment.standalone.StandaloneDeployment;
  */
 abstract class AbstractDeployment extends AbstractServerConnection {
 
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
+    @Component
     protected MavenProject project;
 
     /**
@@ -82,6 +83,12 @@ abstract class AbstractDeployment extends AbstractServerConnection {
     private boolean skip;
 
     /**
+     * Pattern (Regex) of the Server-Artifact to replace/undeploy.
+     */
+    @Parameter(alias = "server-artifact-pattern")
+    private String serverArtifactPattern;
+
+    /**
      * The archive file.
      *
      * @return the archive file.
@@ -111,7 +118,8 @@ abstract class AbstractDeployment extends AbstractServerConnection {
         doExecute();
     }
 
-    protected final Status executeDeployment(final ModelControllerClient client, final Deployment deployment) throws DeploymentExecutionException, DeploymentFailureException, IOException {
+    protected final Status executeDeployment(final ModelControllerClient client, final Deployment deployment)
+            throws DeploymentExecutionException, DeploymentFailureException, IOException {
         // Execute before deployment commands
         if (beforeDeployment != null) beforeDeployment.execute(client);
         // Deploy the deployment
@@ -127,16 +135,17 @@ abstract class AbstractDeployment extends AbstractServerConnection {
      *
      * @see #execute()
      */
-    protected void doExecute() throws MojoExecutionException, MojoFailureException {
+    protected void doExecute() throws MojoExecutionException {
         try {
             synchronized (CLIENT_LOCK) {
                 validate();
                 final ModelControllerClient client = getClient();
                 final Deployment deployment;
                 if (isDomainServer()) {
-                    deployment = DomainDeployment.create((DomainClient) client, domain, file(), name, getType());
+                    deployment = DomainDeployment.create((DomainClient) client, domain, file(), name,
+                                                         serverArtifactPattern, getType());
                 } else {
-                    deployment = StandaloneDeployment.create(client, file(), name, getType());
+                    deployment = StandaloneDeployment.create(client, file(), name, serverArtifactPattern, getType());
                 }
                 switch (executeDeployment(client, deployment)) {
                     case REQUIRES_RESTART: {
@@ -147,10 +156,6 @@ abstract class AbstractDeployment extends AbstractServerConnection {
                         break;
                 }
             }
-        } catch (MojoFailureException e) {
-            throw e;
-        } catch (MojoExecutionException e) {
-            throw e;
         } catch (Exception e) {
             throw new MojoExecutionException(String.format("Could not execute goal %s on %s. Reason: %s", goal(), file(), e.getMessage()), e);
         } finally {
