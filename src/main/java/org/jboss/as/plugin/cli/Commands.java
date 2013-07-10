@@ -120,7 +120,8 @@ public class Commands {
 
         if (hasCommands || hasScripts) {
             final CommandContext ctx = create(client);
-            try {
+            // JBASMP-48 Exception ModelControllerClient is closed
+            //try {
 
                 if (isBatch()) {
                     executeBatch(ctx);
@@ -128,11 +129,11 @@ public class Commands {
                     executeCommands(ctx);
                 }
                 executeScripts(ctx);
-
-            } finally {
-                ctx.terminateSession();
-                ctx.bindClient(null);
-            }
+            // JBASMP-48 Exception ModelControllerClient is closed
+            //} finally {
+            //  ctx.terminateSession();
+            //  ctx.bindClient(null);
+            //}
         }
 
     }
