@@ -53,6 +53,8 @@ public interface PropertyNames {
 
     String JBOSS_VERSION = "jboss-as.version";
 
+    String JBOSS_AS_ARTIFIFACT = "jboss-as.artifact";
+
     String JVM_ARGS = "jboss-as.jvmArgs";
 
     String MODULES_PATH = "jboss-as.modulesPath";
