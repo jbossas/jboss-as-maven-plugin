@@ -72,7 +72,7 @@ public class Distribution {
         final File target = new File(buildDir, JBOSS_DIR);
         Streams.unzip(result.getArtifact().getFile(), target);
 
-        return new File(target.getAbsoluteFile(), String.format("jboss-as-%s", version));
+        return new File(target.getAbsoluteFile(), String.format("jboss-as-%s", result.getArtifact().getVersion()));
     }
 
 }
