@@ -22,6 +22,8 @@
 
 package org.jboss.as.plugin.server;
 
+import static org.jboss.as.plugin.common.Distribution.extractIfRequired;
+
 import java.io.File;
 import java.util.List;
 
@@ -34,28 +36,21 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.jboss.as.plugin.common.AbstractServerConnection;
 import org.jboss.as.plugin.common.PropertyNames;
-import org.jboss.as.plugin.common.Streams;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 
 /**
  * Starts a standalone instance of JBoss Application Server 7.
  * <p/>
  * The purpose of this goal is to start a JBoss Application Server for testing during the maven lifecycle. This can
  * start a remote server, but the server will be shutdown when the maven process ends.
- *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "start", requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class Start extends AbstractServerConnection {
 
     public static final String JBOSS_DIR = "jboss-as-run";
-
 
     /**
      * The target directory the application to be deployed is located.
@@ -90,8 +85,17 @@ public class Start extends AbstractServerConnection {
     /**
      * The version of the JBoss Application Server to run.
      */
-    @Parameter(alias = "jboss-as-version", defaultValue = Defaults.JBOSS_AS_TARGET_VERSION, property = PropertyNames.JBOSS_VERSION)
+    // JBASMP-49 - Give the ability to specify the jboss-as dist artifact
+    // Default value will be handled by code because of JBASMP-49
+    // We may need to put it @Deprecated
+    @Parameter(alias = "jboss-as-version", property = PropertyNames.JBOSS_VERSION)
     private String version;
+
+    /**
+     * The JBoss AS distribution artifact coordinates in the form of: groupId:artifactId:packaging:version
+     */
+    @Parameter(alias = "jboss-as-artifact", property = PropertyNames.JBOSS_AS_ARTIFIFACT, defaultValue = Defaults.JBOSS_AS_TARGET_ARTIFACT)
+    private String jbossAsArtifact;
 
     /**
      * The modules path to use.
@@ -139,7 +143,9 @@ public class Start extends AbstractServerConnection {
     public void execute() throws MojoExecutionException, MojoFailureException {
         final Log log = getLog();
         // Validate the environment
-        final File jbossHome = extractIfRequired(targetDir);
+        log.info(String.format("Resolving artifact %s from %s", jbossAsArtifact, remoteRepos));
+        final File jbossHome = extractIfRequired(targetDir, this.jbossHome, jbossAsArtifact, version, remoteRepos, repoSession, repoSystem);
+
         if (!jbossHome.isDirectory()) {
             throw new MojoExecutionException(String.format("JBOSS_HOME '%s' is not a valid directory.", jbossHome));
         }
@@ -174,29 +180,6 @@ public class Start extends AbstractServerConnection {
             throw new MojoExecutionException("The server failed to start", e);
         }
 
-    }
-
-    private File extractIfRequired(final File buildDir) throws MojoFailureException, MojoExecutionException {
-        if (jbossHome != null) {
-            //we do not need to download JBoss
-            return new File(jbossHome);
-        }
-        final ArtifactRequest request = new ArtifactRequest();
-        final String jbossAsArtifact = String.format("org.jboss.as:jboss-as-dist:zip:%s", version);
-        request.setArtifact(new DefaultArtifact(jbossAsArtifact));
-        request.setRepositories(remoteRepos);
-        getLog().info(String.format("Resolving artifact %s from %s", jbossAsArtifact, remoteRepos));
-        final ArtifactResult result;
-        try {
-            result = repoSystem.resolveArtifact(repoSession, request);
-        } catch (ArtifactResolutionException e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
-
-        final File target = new File(buildDir, JBOSS_DIR);
-        Streams.unzip(result.getArtifact().getFile(), target);
-
-        return new File(target.getAbsoluteFile(), String.format("jboss-as-%s", version));
     }
 
     @Override
