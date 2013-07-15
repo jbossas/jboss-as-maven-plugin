@@ -186,6 +186,8 @@ public class AddResource extends AbstractServerConnection {
                 }
             }
         }
+        // JBASMP-48 Exception ModelControllerClient is closed
+        close();
     }
 
     private boolean addCompositeResource(final String profileName, final ModelControllerClient client, final Resource resource, final String parentAddress, final CompositeOperationBuilder compositeOp, final boolean checkExistence) throws IOException {

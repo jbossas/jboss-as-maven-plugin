@@ -38,6 +38,11 @@ interface Defaults {
     String JBOSS_AS_TARGET_VERSION = "7.1.1.Final";
 
     /**
+     * The default JBoss AS artifact coordinates.
+     */
+    String JBOSS_AS_TARGET_ARTIFACT = "org.jboss.as:jboss-as-dist:zip:" + JBOSS_AS_TARGET_VERSION;
+
+    /**
      * The default startup timeout.
      */
     String TIMEOUT = "60";
