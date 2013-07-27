@@ -7,7 +7,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.jboss.as.plugin.common.PropertyNames;
 
 /**
- * Deploys the application to the JBoss Application Server.
+ * Deploys only the application to the JBoss Application Server without first invoking the
+ * the execution of the lifecycle phase 'package' prior to executing itself.
  * <p/>
  * If {@code force} is set to {@code true}, the server is queried to see if the application already exists. If the
  * application already exists, the application is redeployed instead of deployed. If the application does not exist the
@@ -16,7 +17,6 @@ import org.jboss.as.plugin.common.PropertyNames;
  * If {@code force} is set to {@code false} and the application has already been deployed to the server, an error
  * will occur and the deployment will fail.
  *
- * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "deploy-only", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class DeployOnly extends AbstractAppDeployment {
