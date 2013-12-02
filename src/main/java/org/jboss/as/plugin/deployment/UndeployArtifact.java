@@ -80,6 +80,7 @@ public final class UndeployArtifact extends AbstractDeployment {
         }
         @SuppressWarnings("unchecked")
         final Set<Artifact> dependencies = project.getArtifacts();
+        dependencies.addAll(this.project.getDependencyArtifacts());
         Artifact artifact = null;
         for (final Artifact a : dependencies) {
             if (a.getArtifactId().equals(artifactId) &&
