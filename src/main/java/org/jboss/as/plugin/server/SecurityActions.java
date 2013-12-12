@@ -22,9 +22,12 @@
 
 package org.jboss.as.plugin.server;
 
+import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.TimeUnit;
+
+import org.codehaus.plexus.classworlds.realm.ClassRealm;
 
 /**
  * Security actions to perform possibly privileged operations. No methods in this class are to be made public under any
@@ -34,10 +37,35 @@ import java.util.concurrent.TimeUnit;
  */
 final class SecurityActions {
 
+    /**
+     * Bad hack to respawn the plugin's class loader when Maven is already shut down.
+     */
+    static void respawnCurrentClassLoader() {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (!(classLoader instanceof ClassRealm)) {
+            // It seems there is nothing we can do if the current class loader is not a ClassRealm.
+            return;
+        }
+
+        // Modify the current class loader so that classes that was not loaded during the Maven build will be loaded by the new class loader.
+        final ClassRealm classRealm = (ClassRealm) classLoader;
+        ClassLoader newClassLoader = new URLClassLoader(classRealm.getURLs(), classRealm.getParentClassLoader()) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                // We should first check whether the requested class was already loaded by the old class loader in order not to break compatibility with already loaded classes.
+                Class<?> clazz = classRealm.loadClassFromSelf(name);
+                return clazz != null ? clazz : super.loadClass(name, resolve);
+            }
+        };
+        classRealm.setParentClassLoader(newClassLoader);
+    }
+
     static void registerShutdown(final Server server) {
         final Thread hook = new Thread(new Runnable() {
             @Override
             public void run() {
+                respawnCurrentClassLoader();
+
                 server.stop();
                 // Bad hack to get maven to complete it's message output
                 try {
