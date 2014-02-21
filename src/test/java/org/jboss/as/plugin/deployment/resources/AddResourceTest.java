@@ -37,6 +37,7 @@ import org.junit.Test;
  * AddResource test case
  *
  * @author <a href="mailto:dave.himself@gmail.com">Dave Heath</a>
+ * @author <a href="mailto:jarkko.rantavuori@iki.fi">Jarkko Rantavuori</a>
  */
 public class AddResourceTest extends AbstractItTestCase {
 
@@ -60,6 +61,22 @@ public class AddResourceTest extends AbstractItTestCase {
         mavenProject.setPackaging("war");
 
         final File pom = getPom("add-resource-with-composite-pom.xml");
+
+        final AddResource addResourceMojo = lookupMojoAndVerify("add-resource", pom);
+        try {
+            addResourceMojo.execute();
+        } catch (Exception ex) {
+            fail(ex.getMessage());
+        }
+
+    }
+
+    @Test
+    public void testCanAddXADatasourceResource() throws Exception {
+        final MavenProject mavenProject = new MavenProject();
+        mavenProject.setPackaging("war");
+
+        final File pom = getPom("add-resource-xa-datasource.xml");
 
         final AddResource addResourceMojo = lookupMojoAndVerify("add-resource", pom);
         try {
