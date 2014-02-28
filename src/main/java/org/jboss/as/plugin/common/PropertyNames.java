@@ -35,6 +35,8 @@ public interface PropertyNames {
 
     String DEPLOY_FORCE = "deploy.force";
 
+    String DEPLOY_ENABLED = "deploy.enabled";
+
     String DEPLOYMENT_FILENAME = "jboss-as.deployment.filename";
 
     String DEPLOYMENT_TARGET_DIR = "jboss-as.deployment.targetDir";
