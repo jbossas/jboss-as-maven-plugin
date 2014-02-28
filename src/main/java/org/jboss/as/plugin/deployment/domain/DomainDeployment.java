@@ -105,13 +105,25 @@ public class DomainDeployment implements Deployment {
         DeploymentActionsCompleteBuilder completeBuilder = null;
         List<String> existingDeployments = DeploymentInspector.getDeployments(client, name, matchPattern);
         switch (type) {
+            case ADD: {
+                completeBuilder = builder.add(name, content);
+                break;
+            }
+            case FORCE_ADD: {
+                if (existingDeployments.contains(name)) {
+                    completeBuilder = builder.replace(name, content);
+                } else {
+                    completeBuilder = builder.add(name, content);
+                }
+                break;
+            }
             case DEPLOY: {
                 completeBuilder = builder.add(name, content).andDeploy();
                 break;
             }
             case FORCE_DEPLOY: {
                 if (existingDeployments.contains(name)) {
-                    completeBuilder = builder.replace(name, content);
+                    completeBuilder = builder.replace(name, content).deploy(name);
                 } else {
                     completeBuilder = builder.add(name, content).andDeploy();
                 }

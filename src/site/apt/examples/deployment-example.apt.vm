@@ -11,7 +11,7 @@ Deploy/Undeploy Examples
 * Deploying your application
 
   The plugin goals {{{../deploy-mojo.html}deploy}}, {{{../undeploy-mojo.html}undeploy}},
-  and {{{../redeploy-mojo.html}redeploy}} can be used to deploy, redeploy and undeploy applications
+  and {{{../redeploy-mojo.html}redeploy}} can be used to deploy, undeploy and redeploy applications
   to a JBoss Application Server. The first step is to add the appropriate configuration
   to your plugin configuration in the POM.
 
@@ -195,6 +195,44 @@ Deploy/Undeploy Examples
                         </server-groups>
                     </domain>
                 </configuration>
+            </plugin>
+            ...
+        </plugins>
+        ...
+    </build>
+...
+</project>
+----------
+
+
+* Deploying your application without launching it.
+
+  JBoss AS allows content to be disabled or enabled via the management interface. The default deployment goals above
+  will automatically enable the content, which may not be desirable. To avoid this, change the <<<deployEnabled>>>
+  parameter.
+
+----------
+<project>
+    ...
+    <build>
+        ...
+        <plugins>
+            ...
+            <plugin>
+                <groupId>org.jboss.as.plugins</groupId>
+                <artifactId>jboss-as-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <deployEnabled>false</deployEnabled>
+                        <configuration>
+                    </execution>
+                </executions>
             </plugin>
             ...
         </plugins>

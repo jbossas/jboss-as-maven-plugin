@@ -58,6 +58,35 @@ public class DeployTest extends AbstractItTestCase {
     }
 
     @Test
+    public void testAdd() throws Exception {
+
+        // Make sure the archive is not deployed
+        if (isDeployed(DEPLOYMENT_NAME)) {
+            undeploy(DEPLOYMENT_NAME);
+        }
+
+        final MavenProject mavenProject = new MavenProject();
+        mavenProject.setPackaging("war");
+
+        final File pom = getPom("deploy-disabled-webarchive-pom.xml");
+
+        final AbstractDeployment deployMojo = lookupMojoAndVerify("deploy", pom);
+
+        deployMojo.project = mavenProject;
+        deployMojo.execute();
+
+        // Verify deployed
+        assertTrue("Deployment " + DEPLOYMENT_NAME + " was not deployed", isDeployed(DEPLOYMENT_NAME));
+
+        // /deployment=test.war :read-attribute(name=status)
+        final ModelNode address = ServerOperations.createAddress("deployment", DEPLOYMENT_NAME);
+        final ModelNode op = ServerOperations.createReadAttributeOperation(address, "status");
+        final ModelNode result = executeOperation(managementClient.getControllerClient(), op);
+
+        assertEquals("STOPPED", ServerOperations.readResultAsString(result));
+    }
+
+    @Test
     public void testDeployWithCommands() throws Exception {
 
         // Make sure the archive is not deployed

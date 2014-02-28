@@ -97,6 +97,18 @@ public class StandaloneDeployment implements Deployment {
         List<String> existingDeployments = DeploymentInspector.getDeployments(client, name, matchPattern);
 
         switch (type) {
+            case ADD: {
+                planBuilder = builder.add(name, content);
+                break;
+            }
+            case FORCE_ADD: {
+                if (existingDeployments.contains(name)) {
+                    planBuilder = builder.replace(name, content);
+                } else {
+                    planBuilder = builder.add(name, content);
+                }
+                break;
+            }
             case DEPLOY: {
                 planBuilder = builder.add(name, content).andDeploy();
                 break;
@@ -112,7 +124,7 @@ public class StandaloneDeployment implements Deployment {
             }
             case FORCE_DEPLOY: {
                 if (existingDeployments.contains(name)) {
-                    planBuilder = builder.replace(name, content).redeploy(name);
+                    planBuilder = builder.replace(name, content).deploy(name);
                 } else {
                     planBuilder = builder.add(name, content).andDeploy();
                 }
