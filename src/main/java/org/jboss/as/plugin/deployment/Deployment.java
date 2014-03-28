@@ -31,6 +31,7 @@ import org.jboss.as.plugin.common.DeploymentFailureException;
 public interface Deployment {
 
     public enum Type {
+        ADD, FORCE_ADD,
         DEPLOY,
         FORCE_DEPLOY,
         UNDEPLOY,

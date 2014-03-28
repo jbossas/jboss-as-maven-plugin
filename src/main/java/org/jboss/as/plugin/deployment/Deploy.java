@@ -55,6 +55,20 @@ public class Deploy extends AbstractAppDeployment {
     @Parameter(defaultValue = "true", property = PropertyNames.DEPLOY_FORCE)
     private boolean force;
 
+    /**
+     * Specifies whether the deployed application should be automatically enabled or not.
+     * <p>
+     * If enabled, the deploy goal will automatically run the application in the target container. If disabled, the
+     * content will be uploaded but not deployed.
+     * <p>
+     * Note that if an application of the same name is already running and the <tt>force</tt> parameter is true, the
+     * application will be enabled automatically, even if this parameter is false (disabled). That is, an enabled
+     * application will not be disabled by re-deployment. The converse is true, i.e. a disabled application may be
+     * enabled by a forced deployment of the same content where this parameter is true.
+     */
+    @Parameter(defaultValue = "true", property = PropertyNames.DEPLOY_ENABLED)
+    private boolean deployEnabled = true;
+
     @Override
     public String goal() {
         return "deploy";
@@ -62,7 +76,11 @@ public class Deploy extends AbstractAppDeployment {
 
     @Override
     public Type getType() {
-        return (force ? Type.FORCE_DEPLOY : Type.DEPLOY);
+        if (deployEnabled) {
+            return (force ? Type.FORCE_DEPLOY : Type.DEPLOY);
+        } else {
+            return (force ? Type.FORCE_ADD : Type.ADD);
+        }
     }
 
 }
