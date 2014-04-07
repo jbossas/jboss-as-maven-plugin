@@ -166,8 +166,8 @@ public class DomainDeployment implements Deployment {
 
         DeploymentActionsCompleteBuilder completeBuilder = null;
         for (String deploymentName : deploymentNames) {
-
-            completeBuilder = builder.undeploy(deploymentName).andRemoveUndeployed();
+            DeploymentPlanBuilder actualBuilder = (completeBuilder == null ? builder : completeBuilder);
+            completeBuilder = actualBuilder.undeploy(deploymentName).andRemoveUndeployed();
 
             if (matchPatternStrategy == MatchPatternStrategy.FIRST) {
                 break;
