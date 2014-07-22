@@ -107,7 +107,7 @@ public class Run extends Deploy {
     private String version;
 
     /**
-     * The modules path to use.
+     * The modules path roots to use, each separated with {@link File#pathSeparatorChar}.
      */
     @Parameter(alias = "modules-path", property = PropertyNames.MODULES_PATH)
     private String modulesPath;
@@ -172,8 +172,10 @@ public class Run extends Deploy {
             javaHome = this.javaHome;
         }
         final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, modulesPath, bundlesPath, jvmArgs, serverConfig, propertiesFile, startupTimeout);
-        if (!serverInfo.getModulesDir().isDirectory()) {
-            throw new MojoExecutionException(String.format("Modules path '%s' is not a valid directory.", modulesPath));
+        for(File root : serverInfo.getModulesDir()) {
+          if (!root.isDirectory()) {
+            throw new MojoExecutionException(String.format("Modules path '%s' is not a valid directory.", root));
+          }
         }
 
         // Print some server information

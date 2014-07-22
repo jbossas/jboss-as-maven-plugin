@@ -35,7 +35,8 @@ import org.jboss.as.plugin.common.Files;
 class ServerInfo {
     private final ConnectionInfo connectionInfo;
     private final File jbossHome;
-    private final File modulesDir;
+    private final File[] modulesDir;
+    private final String modulesDirValue;
     private final File bundlesDir;
     private final String[] jvmArgs;
     private final String javaHome;
@@ -47,12 +48,37 @@ class ServerInfo {
         this.connectionInfo = connectionInfo;
         this.javaHome = javaHome;
         this.jbossHome = jbossHome;
-        this.modulesDir = (modulesDir == null ? Files.createFile(jbossHome, "modules") : new File(modulesDir));
+        this.modulesDir = splitAndCreate(modulesDir, jbossHome);
+        this.modulesDirValue = makeAbsolute(this.modulesDir);
         this.bundlesDir = (bundlesDir == null ? Files.createFile(jbossHome, "bundles") : new File(bundlesDir));
         this.jvmArgs = jvmArgs;
         this.serverConfig = serverConfig;
         this.propertiesFile = propertiesFile;
         this.startupTimeout = startupTimeout;
+    }
+
+    private static File[] splitAndCreate(String multi, File relTo) {
+      File[] res;
+      if (null == multi) {
+        res = new File[] { Files.createFile(relTo, "modules") };
+      } else {
+        String[] roots = multi.split(File.pathSeparator);
+        res = new File[roots.length];
+        for (int i = 0; i < roots.length; i++)
+          res[i] = new File(roots[i]);
+      }
+      return res;
+    }
+
+    private static String makeAbsolute(File[] roots) {
+      if(null == roots || 0 == roots.length) {
+        return "";
+      } else {
+        String res = "";
+        for (int i = 0; i < roots.length; i++)
+          res += roots[i].getAbsoluteFile() + File.pathSeparator;
+        return res.substring(0, res.length() - 1);
+      }
     }
 
     /**
@@ -92,12 +118,21 @@ class ServerInfo {
     }
 
     /**
-     * The directory for all the modules.
+     * The directories to be used as roots to find all the modules.
      *
-     * @return the modules directory
+     * @return the modules directories
      */
-    public File getModulesDir() {
+    public File[] getModulesDir() {
         return modulesDir;
+    }
+
+    /**
+     * The directories to be used as roots to find all the modules.
+     *
+     * @return the modules directories
+     */
+    public String getModulesDirValue() {
+        return modulesDirValue;
     }
 
     /**
