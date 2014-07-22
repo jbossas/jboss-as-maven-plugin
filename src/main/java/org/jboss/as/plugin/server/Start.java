@@ -169,8 +169,10 @@ public class Start extends AbstractServerConnection {
             javaHome = this.javaHome;
         }
         final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, modulesPath, bundlesPath, jvmArgs, serverConfig, propertiesFile, startupTimeout);
-        if (!serverInfo.getModulesDir().isDirectory()) {
-            throw new MojoExecutionException(String.format("Modules path '%s' is not a valid directory.", modulesPath));
+        for(File root : serverInfo.getModulesDir()) {
+          if (!root.isDirectory()) {
+              throw new MojoExecutionException(String.format("Modules path '%s' is not a valid directory.", root));
+          }
         }
         // Print some server information
         log.info(String.format("JAVA_HOME=%s", javaHome));

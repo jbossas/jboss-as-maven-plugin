@@ -124,12 +124,12 @@ final class StandaloneServer extends Server {
         cmd.add("-Djboss.home.dir=" + jbossHome);
         cmd.add("-Dorg.jboss.boot.log.file=" + jbossHome + "/standalone/log/boot.log");
         cmd.add("-Dlogging.configuration=file:" + jbossHome + CONFIG_PATH + "logging.properties");
-        cmd.add("-Djboss.modules.dir=" + serverInfo.getModulesDir().getAbsolutePath());
+//        cmd.add("-Djboss.modules.dir=" + serverInfo.getModulesDirValue());
         cmd.add("-Djboss.bundles.dir=" + serverInfo.getBundlesDir().getAbsolutePath());
         cmd.add("-jar");
         cmd.add(modulesJar.getAbsolutePath());
         cmd.add("-mp");
-        cmd.add(serverInfo.getModulesDir().getAbsolutePath());
+        cmd.add(serverInfo.getModulesDirValue());
         cmd.add("-jaxpmodule");
         cmd.add("javax.xml.jaxp-provider");
         cmd.add("org.jboss.as.standalone");
