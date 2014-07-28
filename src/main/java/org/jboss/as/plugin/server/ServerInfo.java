@@ -35,7 +35,7 @@ import org.jboss.as.plugin.common.Files;
 class ServerInfo {
     private final ConnectionInfo connectionInfo;
     private final File jbossHome;
-    private final File modulesDir;
+    private final String modulesDir;
     private final File bundlesDir;
     private final String[] jvmArgs;
     private final String javaHome;
@@ -47,7 +47,7 @@ class ServerInfo {
         this.connectionInfo = connectionInfo;
         this.javaHome = javaHome;
         this.jbossHome = jbossHome;
-        this.modulesDir = (modulesDir == null ? Files.createFile(jbossHome, "modules") : new File(modulesDir));
+        this.modulesDir = (modulesDir == null ? Files.createPath(jbossHome.getAbsolutePath(), "modules") : modulesDir);
         this.bundlesDir = (bundlesDir == null ? Files.createFile(jbossHome, "bundles") : new File(bundlesDir));
         this.jvmArgs = jvmArgs;
         this.serverConfig = serverConfig;
@@ -92,11 +92,11 @@ class ServerInfo {
     }
 
     /**
-     * The directory for all the modules.
+     * The directory or directories for all the modules.
      *
      * @return the modules directory
      */
-    public File getModulesDir() {
+    public String getModulesDir() {
         return modulesDir;
     }
 
