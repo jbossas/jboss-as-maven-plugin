@@ -173,6 +173,9 @@ final class DomainServer extends Server {
         cmd.add("--");
         cmd.add("-default-jvm");
         cmd.add(javaExec);
+        if (serverInfo.getServerArgs() != null) {
+            Collections.addAll(cmd, serverInfo.getServerArgs());
+        }
         return cmd;
     }
 

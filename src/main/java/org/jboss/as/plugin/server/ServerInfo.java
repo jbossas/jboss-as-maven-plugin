@@ -41,9 +41,10 @@ class ServerInfo {
     private final String javaHome;
     private final String serverConfig;
     private final String propertiesFile;
+    private final String[] serverArgs;
     private final long startupTimeout;
 
-    private ServerInfo(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final long startupTimeout) {
+    private ServerInfo(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final String[] serverArgs, final long startupTimeout) {
         this.connectionInfo = connectionInfo;
         this.javaHome = javaHome;
         this.jbossHome = jbossHome;
@@ -52,6 +53,7 @@ class ServerInfo {
         this.jvmArgs = jvmArgs;
         this.serverConfig = serverConfig;
         this.propertiesFile = propertiesFile;
+        this.serverArgs = serverArgs;
         this.startupTimeout = startupTimeout;
     }
 
@@ -65,12 +67,13 @@ class ServerInfo {
      * @param bundlesDir     the bundles directory
      * @param jvmArgs        the JVM arguments
      * @param serverConfig   the path to the servers configuration file
+     * @param serverArgs     the arguments to pass to the main module
      * @param startupTimeout the startup timeout
      *
-     * @return the server configuration information
+     *  @return the server configuration information
      */
-    public static ServerInfo of(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final long startupTimeout) {
-        return new ServerInfo(connectionInfo, javaHome, jbossHome, modulesDir, bundlesDir, jvmArgs, serverConfig, propertiesFile, startupTimeout);
+    public static ServerInfo of(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final String[] serverArgs, final long startupTimeout) {
+        return new ServerInfo(connectionInfo, javaHome, jbossHome, modulesDir, bundlesDir, jvmArgs, serverConfig, propertiesFile, serverArgs, startupTimeout);
     }
 
     /**
@@ -143,6 +146,15 @@ class ServerInfo {
      */
     public String getPropertiesFile() {
         return propertiesFile;
+    }
+
+    /**
+     * The optional server arguments.
+     *
+     * @return the server arguments or {@code null} if there are none
+     */
+    public String[] getServerArgs() {
+        return serverArgs;
     }
 
     /**

@@ -83,4 +83,6 @@ public interface PropertyNames {
 
     String PROPERTIES_FILE = "jboss-as.propertiesFile";
 
+    String SERVER_ARGS = "jboss-as.serverArgs";
+
 }

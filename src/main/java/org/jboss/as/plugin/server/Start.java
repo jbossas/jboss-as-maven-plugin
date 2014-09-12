@@ -149,6 +149,12 @@ public class Start extends AbstractServerConnection {
     private String propertiesFile;
 
     /**
+     * A space delimited list of server arguments.
+     */
+    @Parameter(alias = "server-args", property = PropertyNames.SERVER_ARGS)
+    private String serverArgs;
+
+    /**
      * The timeout value to use when starting the server.
      */
     @Parameter(alias = "startup-timeout", defaultValue = Defaults.TIMEOUT, property = PropertyNames.STARTUP_TIMEOUT)
@@ -162,8 +168,6 @@ public class Start extends AbstractServerConnection {
         if (!jbossHome.isDirectory()) {
             throw new MojoExecutionException(String.format("JBOSS_HOME '%s' is not a valid directory.", jbossHome));
         }
-        // JVM arguments should be space delimited
-        final String[] jvmArgs = (this.jvmArgs == null ? null : this.jvmArgs.split("\\s+"));
         final String javaHome;
         if (this.javaHome == null) {
             javaHome = SecurityActions.getEnvironmentVariable("JAVA_HOME");
@@ -174,7 +178,7 @@ public class Start extends AbstractServerConnection {
         if (!invalidPaths.isEmpty()) {
             throw new MojoExecutionException("Invalid module path(s). " + invalidPaths);
         }
-        final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, modulesPath.get(), bundlesPath, jvmArgs, serverConfig, propertiesFile, startupTimeout);
+        final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, modulesPath.get(), bundlesPath, splitBySpaces(jvmArgs), serverConfig, propertiesFile, splitBySpaces(serverArgs), startupTimeout);
         // Print some server information
         log.info(String.format("JAVA_HOME=%s", javaHome));
         log.info(String.format("JBOSS_HOME=%s%n", jbossHome));
@@ -191,6 +195,10 @@ public class Start extends AbstractServerConnection {
             throw new MojoExecutionException("The server failed to start", e);
         }
 
+    }
+
+    private String[] splitBySpaces(String args) {
+        return args == null ? null : args.split("\\s+");
     }
 
     private File extractIfRequired(final File buildDir) throws MojoFailureException, MojoExecutionException {
