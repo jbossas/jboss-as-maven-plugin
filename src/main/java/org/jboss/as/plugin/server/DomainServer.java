@@ -135,6 +135,7 @@ final class DomainServer extends Server {
     @Override
     protected List<String> createLaunchCommand() {
         final File jbossHome = serverInfo.getJbossHome();
+        final File jbossBase = serverInfo.getJbossBase();
         final String javaHome = serverInfo.getJavaHome();
         final File modulesJar = new File(Files.createPath(jbossHome.getAbsolutePath(), "jboss-modules.jar"));
         if (!modulesJar.exists())
@@ -152,8 +153,12 @@ final class DomainServer extends Server {
         }
 
         cmd.add("-Djboss.home.dir=" + jbossHome);
-        cmd.add("-Dorg.jboss.boot.log.file=" + jbossHome + "/domain/log/process-controller.log");
-        cmd.add("-Dlogging.configuration=file:" + jbossHome + CONFIG_PATH + "logging.properties");
+        if (jbossBase != null) {
+            throw new IllegalStateException("Not supported : " + jbossBase);
+        } else {
+            cmd.add("-Dorg.jboss.boot.log.file=" + jbossHome + "/domain/log/process-controller.log");
+            cmd.add("-Dlogging.configuration=file:" + jbossHome + CONFIG_PATH + "logging.properties");
+        }
         cmd.add("-Djboss.bundles.dir=" + serverInfo.getBundlesDir().getAbsolutePath());
         // TODO (jrp) if this goes into production, these need to be used
         // cmd.add("-Djboss.domain.default.config=" + config.getDomainConfig());

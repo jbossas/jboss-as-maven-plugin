@@ -42,6 +42,7 @@ import org.jboss.dmr.ModelNode;
 final class StandaloneServer extends Server {
 
     private static final String CONFIG_PATH = "/standalone/configuration/";
+    private static final String LOG_PATH = "/standalone/log/";
     private static final String STARTING = "STARTING";
     private static final String STOPPING = "STOPPING";
 
@@ -105,6 +106,7 @@ final class StandaloneServer extends Server {
     @Override
     protected List<String> createLaunchCommand() {
         final File jbossHome = serverInfo.getJbossHome();
+        final File jbossBase = serverInfo.getJbossBase();
         final String javaHome = serverInfo.getJavaHome();
         final File modulesJar = new File(Files.createPath(jbossHome.getAbsolutePath(), "jboss-modules.jar"));
         if (!modulesJar.exists())
@@ -120,11 +122,17 @@ final class StandaloneServer extends Server {
         if (serverInfo.getJvmArgs() != null) {
             Collections.addAll(cmd, serverInfo.getJvmArgs());
         }
-
         cmd.add("-Djboss.home.dir=" + jbossHome);
-        cmd.add("-Dorg.jboss.boot.log.file=" + jbossHome + "/standalone/log/boot.log");
-        cmd.add("-Dlogging.configuration=file:" + jbossHome + CONFIG_PATH + "logging.properties");
-//        cmd.add("-Djboss.modules.dir=" + serverInfo.getModulesDir());
+
+        if (jbossBase == null) {
+            cmd.add("-Dorg.jboss.boot.log.file=" + jbossHome + LOG_PATH + "boot.log");
+            cmd.add("-Dlogging.configuration=file:" + jbossHome + CONFIG_PATH + "logging.properties");
+        } else {
+            cmd.add("-Djboss.server.base.dir=" + jbossBase + "/standalone");
+            cmd.add("-Dorg.jboss.boot.log.file=" + jbossBase + LOG_PATH + "boot.log");
+            cmd.add("-Dlogging.configuration=file:" + jbossBase + CONFIG_PATH + "logging.properties");
+        }
+        //        cmd.add("-Djboss.modules.dir=" + serverInfo.getModulesDir());
         cmd.add("-Djboss.bundles.dir=" + serverInfo.getBundlesDir().getAbsolutePath());
         cmd.add("-jar");
         cmd.add(modulesJar.getAbsolutePath());

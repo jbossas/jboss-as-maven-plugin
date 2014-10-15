@@ -73,6 +73,12 @@ public class Start extends AbstractServerConnection {
     private String jbossHome;
 
     /**
+     * The JBoss Application Server's base directory. May be null.
+     */
+    @Parameter(alias = "jboss-base", property = PropertyNames.JBOSS_BASE)
+    private String jbossBase;
+
+    /**
      * A string of the form groupId:artifactId:version[:packaging][:classifier]. Any missing portion of the artifact
      * will be replaced with the it's appropriate default property value
      */
@@ -162,6 +168,10 @@ public class Start extends AbstractServerConnection {
         if (!jbossHome.isDirectory()) {
             throw new MojoExecutionException(String.format("JBOSS_HOME '%s' is not a valid directory.", jbossHome));
         }
+        final File jbossBase = new File(this.jbossBase);
+        if (!jbossBase.isDirectory()) {
+            throw new MojoExecutionException(String.format("JBOSS_BASE '%s' is not a valid directory.", jbossBase));
+        }
         // JVM arguments should be space delimited
         final String[] jvmArgs = (this.jvmArgs == null ? null : this.jvmArgs.split("\\s+"));
         final String javaHome;
@@ -174,10 +184,11 @@ public class Start extends AbstractServerConnection {
         if (!invalidPaths.isEmpty()) {
             throw new MojoExecutionException("Invalid module path(s). " + invalidPaths);
         }
-        final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, modulesPath.get(), bundlesPath, jvmArgs, serverConfig, propertiesFile, startupTimeout);
+        final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, jbossBase, modulesPath.get(), bundlesPath, jvmArgs, serverConfig, propertiesFile, startupTimeout);
         // Print some server information
         log.info(String.format("JAVA_HOME=%s", javaHome));
         log.info(String.format("JBOSS_HOME=%s%n", jbossHome));
+        log.info(String.format("JBOSS_BASE=%s%n", jbossBase));
         try {
             // Create the server
             final Server server = new StandaloneServer(serverInfo);
