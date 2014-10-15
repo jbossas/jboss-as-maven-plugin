@@ -35,6 +35,7 @@ import org.jboss.as.plugin.common.Files;
 class ServerInfo {
     private final ConnectionInfo connectionInfo;
     private final File jbossHome;
+    private final File jbossBase;
     private final String modulesDir;
     private final File bundlesDir;
     private final String[] jvmArgs;
@@ -43,10 +44,11 @@ class ServerInfo {
     private final String propertiesFile;
     private final long startupTimeout;
 
-    private ServerInfo(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final long startupTimeout) {
+    private ServerInfo(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final File jbossBase, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final long startupTimeout) {
         this.connectionInfo = connectionInfo;
         this.javaHome = javaHome;
         this.jbossHome = jbossHome;
+        this.jbossBase = jbossBase;
         this.modulesDir = (modulesDir == null ? Files.createPath(jbossHome.getAbsolutePath(), "modules") : modulesDir);
         this.bundlesDir = (bundlesDir == null ? Files.createFile(jbossHome, "bundles") : new File(bundlesDir));
         this.jvmArgs = jvmArgs;
@@ -69,8 +71,8 @@ class ServerInfo {
      *
      * @return the server configuration information
      */
-    public static ServerInfo of(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final long startupTimeout) {
-        return new ServerInfo(connectionInfo, javaHome, jbossHome, modulesDir, bundlesDir, jvmArgs, serverConfig, propertiesFile, startupTimeout);
+    public static ServerInfo of(final ConnectionInfo connectionInfo, final String javaHome, final File jbossHome, final File jbossBase, final String modulesDir, final String bundlesDir, final String[] jvmArgs, final String serverConfig, final String propertiesFile, final long startupTimeout) {
+        return new ServerInfo(connectionInfo, javaHome, jbossHome, jbossBase, modulesDir, bundlesDir, jvmArgs, serverConfig, propertiesFile, startupTimeout);
     }
 
     /**
@@ -152,5 +154,9 @@ class ServerInfo {
      */
     public long getStartupTimeout() {
         return startupTimeout;
+    }
+
+    public File getJbossBase() {
+        return jbossBase;
     }
 }
