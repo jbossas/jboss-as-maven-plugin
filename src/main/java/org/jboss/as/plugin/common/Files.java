@@ -50,6 +50,9 @@ public class Files {
 
     public static String createPath(final File base, final String... paths) {
         final StringBuilder sb = new StringBuilder(base.getAbsolutePath());
+        if (sb.charAt(sb.length() - 1) != File.separatorChar) {
+            sb.append(File.separatorChar);
+        }
         createPath(sb, paths);
         return sb.toString();
     }
