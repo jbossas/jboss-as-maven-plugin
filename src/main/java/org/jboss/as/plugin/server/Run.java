@@ -122,9 +122,12 @@ public class Run extends Deploy {
 
     /**
      * A space delimited list of JVM arguments.
+     * <p/>
+     * Default value is {@code -Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true
+     * -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000}
      */
-    @Parameter(alias = "jvm-args", property = PropertyNames.JVM_ARGS, defaultValue = Defaults.DEFAULT_JVM_ARGS)
-    private String jvmArgs;
+    @Parameter(alias = "jvm-args", property = PropertyNames.JVM_ARGS)
+    private JavaOpts jvmArgs;
 
     /**
      * The {@code JAVA_HOME} to use for launching the server.
@@ -185,7 +188,7 @@ public class Run extends Deploy {
                 .setJavaHome(javaHome)
                 .setModulesDir(modulesPath.get())
                 .setBundlesDir(bundlesPath)
-                .setJvmArgs(splitBySpaces(jvmArgs))
+                .setJvmArgs(jvmArgs.getArgs())
                 .setServerConfig(this.serverConfig)
                 .setPropertiesFile(propertiesFile)
                 .setServerArgs(serverArgs)
@@ -227,10 +230,6 @@ public class Run extends Deploy {
             throw new MojoExecutionException("The server failed to start", e);
         }
 
-    }
-
-    private String[] splitBySpaces(String args) {
-        return args == null ? new String[0] : args.split("\\s+");
     }
 
     private File extractIfRequired(final File buildDir) throws MojoFailureException, MojoExecutionException {

@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2013, Red Hat, Inc., and individual contributors
+ * Copyright 2014, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -22,46 +22,36 @@
 
 package org.jboss.as.plugin.server;
 
+import java.util.Arrays;
+
+import org.apache.maven.plugins.annotations.Parameter;
+
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
-interface Defaults {
+public class JavaOpts {
 
     /**
-     * The default JVM arguments.
+     * The arguments to be used
+     * <p/>
+     * Default value is {@code -Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true
+     * -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000}
      */
-    String[] DEFAULT_JVM_ARGS = {
-            "-Xms64m",
-            "-Xmx512m",
-            "-XX:MaxPermSize=256m",
-            "-Djava.net.preferIPv4Stack=true",
-            "-Dorg.jboss.resolver.warning=true",
-            "-Dsun.rmi.dgc.client.gcInterval=3600000",
-            "-Dsun.rmi.dgc.server.gcInterval=3600000"
-    };
+    @Parameter
+    private String[] args = Defaults.DEFAULT_JVM_ARGS;
 
-    /**
-     * The default group id
-     */
-    String JBOSS_AS_GROUP_ID = "org.jboss.as";
+    public void set(final String args) {
+        if (args == null) {
+            this.args = new String[0];
+        } else {
+            this.args = args.split("\\s+");
+        }
+    }
 
-    /**
-     * The default artifact id
-     */
-    String JBOSS_AS_ARTIFACT_ID = "jboss-as-dist";
-
-    /*
-     * The default packaging type
-     */
-    String JBOSS_AS_PACKAGING = "zip";
-
-    /**
-     * The default JBoss AS version.
-     */
-    String JBOSS_AS_TARGET_VERSION = "7.1.1.Final";
-
-    /**
-     * The default startup timeout.
-     */
-    String TIMEOUT = "60";
+    public String[] getArgs() {
+        if (args != null && args.length > 0) {
+            return Arrays.copyOf(args, args.length);
+        }
+        return new String[0];
+    }
 }
