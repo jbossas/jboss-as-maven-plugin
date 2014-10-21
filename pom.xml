@@ -78,10 +78,11 @@
 
         <jboss.home>${project.build.directory}${file.separator}jboss-as-${version.org.jboss.as.dist}</jboss.home>
 
-        <version.dependency.plugin>2.8</version.dependency.plugin>
+        <version.dependency.plugin>2.9</version.dependency.plugin>
         <version.enforcer.plugin>1.3</version.enforcer.plugin>
-        <version.plugin.plugin>3.2</version.plugin.plugin>
-        <version.site.plugin>3.3</version.site.plugin>
+        <version.plugin.plugin>3.3</version.plugin.plugin>
+        <version.project.info.reports.plugin>2.7</version.project.info.reports.plugin>
+        <version.site.plugin>3.4</version.site.plugin>
 
         <!-- Checkstyle configuration -->
         <linkXRef>false</linkXRef>
@@ -94,6 +95,10 @@
                 <configuration>
                     <relativizeDecorationLinks>false</relativizeDecorationLinks>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>${version.project.info.reports.plugin}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
