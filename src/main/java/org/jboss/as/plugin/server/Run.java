@@ -154,7 +154,7 @@ public class Run extends Deploy {
     private String[] serverArgs;
 
     /**
-     * The timeout value to use when starting the server.
+     * The arguments to be passed to the server.
      */
     @Parameter(alias = "startup-timeout", defaultValue = Defaults.TIMEOUT, property = PropertyNames.STARTUP_TIMEOUT)
     private long startupTimeout;
