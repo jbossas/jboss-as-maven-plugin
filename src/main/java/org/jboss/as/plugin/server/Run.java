@@ -181,14 +181,22 @@ public class Run extends Deploy {
         if (!invalidPaths.isEmpty()) {
             throw new MojoExecutionException("Invalid module path(s). " + invalidPaths);
         }
-        final ServerInfo serverInfo = ServerInfo.of(this, javaHome, jbossHome, modulesPath.get(), bundlesPath, splitBySpaces(jvmArgs), serverConfig, propertiesFile, splitBySpaces(serverArgs), startupTimeout);
+        final ServerConfig serverConfig = ServerConfig.of(this, jbossHome)
+                .setJavaHome(javaHome)
+                .setModulesDir(modulesPath.get())
+                .setBundlesDir(bundlesPath)
+                .setJvmArgs(splitBySpaces(jvmArgs))
+                .setServerConfig(this.serverConfig)
+                .setPropertiesFile(propertiesFile)
+                .setServerArgs(splitBySpaces(serverArgs))
+                .setStartupTimeout(startupTimeout);
 
         // Print some server information
         log.info(String.format("JAVA_HOME=%s", javaHome));
         log.info(String.format("JBOSS_HOME=%s%n", jbossHome));
         try {
             // Create the server
-            final Server server = new StandaloneServer(serverInfo);
+            final Server server = new StandaloneServer(serverConfig);
             // Add the shutdown hook
             SecurityActions.registerShutdown(server);
             // Start the server
@@ -222,7 +230,7 @@ public class Run extends Deploy {
     }
 
     private String[] splitBySpaces(String args) {
-        return args == null ? null : args.split("\\s+");
+        return args == null ? new String[0] : args.split("\\s+");
     }
 
     private File extractIfRequired(final File buildDir) throws MojoFailureException, MojoExecutionException {

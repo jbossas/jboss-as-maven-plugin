@@ -25,7 +25,6 @@ package org.jboss.as.plugin.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.jboss.as.controller.client.ModelControllerClient;
@@ -41,28 +40,27 @@ import org.jboss.dmr.ModelNode;
  */
 final class StandaloneServer extends Server {
 
-    private static final String CONFIG_PATH = "/standalone/configuration/";
     private static final String STARTING = "STARTING";
     private static final String STOPPING = "STOPPING";
 
-    private final ServerInfo serverInfo;
+    private final ServerConfig serverConfig;
     private boolean isRunning;
     private ModelControllerClient client;
 
     /**
      * Creates a new standalone server.
      *
-     * @param serverInfo the configuration information for the server
+     * @param serverConfig the configuration information for the server
      */
-    public StandaloneServer(final ServerInfo serverInfo) {
-        super(serverInfo, "JBAS015950");
-        this.serverInfo = serverInfo;
+    public StandaloneServer(final ServerConfig serverConfig) {
+        super(serverConfig, "JBAS015950");
+        this.serverConfig = serverConfig;
         isRunning = false;
     }
 
     @Override
     protected void init() throws IOException {
-        client = ModelControllerClient.Factory.create(serverInfo.getConnectionInfo().getHostAddress(), serverInfo.getConnectionInfo().getPort(), serverInfo.getConnectionInfo().getCallbackHandler());
+        client = ModelControllerClient.Factory.create(serverConfig.getConnectionInfo().getHostAddress(), serverConfig.getConnectionInfo().getPort(), serverConfig.getConnectionInfo().getCallbackHandler());
     }
 
     @Override
@@ -91,7 +89,7 @@ final class StandaloneServer extends Server {
     @Override
     public synchronized boolean isRunning() {
         if (isRunning) {
-            return isRunning;
+            return true;
         }
         checkServerState();
         return isRunning;
@@ -104,8 +102,8 @@ final class StandaloneServer extends Server {
 
     @Override
     protected List<String> createLaunchCommand() {
-        final File jbossHome = serverInfo.getJbossHome();
-        final String javaHome = serverInfo.getJavaHome();
+        final File jbossHome = serverConfig.getJbossHome();
+        final String javaHome = serverConfig.getJavaHome();
         final File modulesJar = new File(Files.createPath(jbossHome.getAbsolutePath(), "jboss-modules.jar"));
         if (!modulesJar.exists())
             throw new IllegalStateException("Cannot find: " + modulesJar);
@@ -117,33 +115,32 @@ final class StandaloneServer extends Server {
         // Create the commands
         final List<String> cmd = new ArrayList<String>();
         cmd.add(javaExec);
-        if (serverInfo.getJvmArgs() != null) {
-            Collections.addAll(cmd, serverInfo.getJvmArgs());
-        }
+
+        // Add the JVM args
+        cmd.addAll(serverConfig.getJvmArgs());
 
         cmd.add("-Djboss.home.dir=" + jbossHome);
-        cmd.add("-Dorg.jboss.boot.log.file=" + jbossHome + "/standalone/log/boot.log");
-        cmd.add("-Dlogging.configuration=file:" + jbossHome + CONFIG_PATH + "logging.properties");
-//        cmd.add("-Djboss.modules.dir=" + serverInfo.getModulesDir());
-        cmd.add("-Djboss.bundles.dir=" + serverInfo.getBundlesDir().getAbsolutePath());
+        cmd.add("-Dorg.jboss.boot.log.file=" + Files.createPath(serverConfig.getLogDir(), "boot.log"));
+        cmd.add("-Dlogging.configuration=file:" + Files.createPath(serverConfig.getConfigDir(), "logging.properties"));
+        //        cmd.add("-Djboss.modules.dir=" + serverInfo.getModulesDir());
+        cmd.add("-Djboss.bundles.dir=" + serverConfig.getBundlesDir());
         cmd.add("-jar");
         cmd.add(modulesJar.getAbsolutePath());
         cmd.add("-mp");
-        cmd.add(serverInfo.getModulesDir());
+        cmd.add(serverConfig.getModulesDir());
         cmd.add("-jaxpmodule");
         cmd.add("javax.xml.jaxp-provider");
         cmd.add("org.jboss.as.standalone");
-        if (serverInfo.getServerConfig() != null) {
+        if (serverConfig.getServerConfig() != null) {
             cmd.add("-server-config");
-            cmd.add(serverInfo.getServerConfig());
+            cmd.add(serverConfig.getServerConfig());
         }
-        if (serverInfo.getPropertiesFile() != null) {
+        if (serverConfig.getPropertiesFile() != null) {
             cmd.add("-P");
-            cmd.add(serverInfo.getPropertiesFile());
+            cmd.add(serverConfig.getPropertiesFile());
         }
-        if (serverInfo.getServerArgs() != null) {
-            Collections.addAll(cmd, serverInfo.getServerArgs());
-        }
+        // Add all the server arguments
+        cmd.addAll(serverConfig.getServerArgs());
         return cmd;
     }
 

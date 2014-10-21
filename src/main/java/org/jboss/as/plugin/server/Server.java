@@ -37,17 +37,17 @@ import org.jboss.as.controller.client.ModelControllerClient;
  */
 abstract class Server {
     private final ScheduledExecutorService timerService;
-    private final ServerInfo serverInfo;
+    private final ServerConfig serverConfig;
     private Process process;
     private ConsoleConsumer console;
     private final String shutdownId;
 
-    protected Server(final ServerInfo serverInfo) {
-        this(serverInfo, null);
+    protected Server(final ServerConfig serverConfig) {
+        this(serverConfig, null);
     }
 
-    protected Server(final ServerInfo serverInfo, final String shutdownId) {
-        this.serverInfo = serverInfo;
+    protected Server(final ServerConfig serverConfig, final String shutdownId) {
+        this.serverConfig = serverConfig;
         this.shutdownId = shutdownId;
         timerService = Executors.newScheduledThreadPool(1);
     }
@@ -73,7 +73,7 @@ abstract class Server {
         processBuilder.redirectErrorStream(true);
         process = processBuilder.start();
         console = startConsoleConsumer(process.getInputStream(), shutdownId);
-        long timeout = serverInfo.getStartupTimeout() * 1000;
+        long timeout = serverConfig.getStartupTimeout() * 1000;
         boolean serverAvailable = false;
         long sleep = 50;
         init();
@@ -96,7 +96,7 @@ abstract class Server {
             timerService.scheduleWithFixedDelay(new Reaper(), 20, 10, TimeUnit.SECONDS);
         } else {
             destroyProcess();
-            throw new IllegalStateException(String.format("Managed server was not started within [%d] s", serverInfo.getStartupTimeout()));
+            throw new IllegalStateException(String.format("Managed server was not started within [%d] s", serverConfig.getStartupTimeout()));
         }
     }
 

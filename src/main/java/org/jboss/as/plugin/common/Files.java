@@ -44,27 +44,20 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
  */
 public class Files {
 
-    public static File createFile(final File base, final String... paths) {
-        final StringBuilder sb = new StringBuilder();
-        int count = 0;
-        for (String path : paths) {
-            sb.append(path);
-            if (!path.endsWith(File.separator) && (++count < paths.length)) {
-                sb.append(File.separator);
-            }
-        }
-        return new File(base, sb.toString());
+    public static String createPath(final String... paths) {
+        return createPath(false, paths);
     }
 
-    public static String createPath(final String... paths) {
+    public static String createPath(final File base, final String... paths) {
+        final StringBuilder sb = new StringBuilder(base.getAbsolutePath());
+        createPath(sb, paths);
+        return sb.toString();
+    }
+
+    public static String createPath(final boolean prependSeparator, final String... paths) {
         final StringBuilder sb = new StringBuilder();
-        int count = 0;
-        for (String path : paths) {
-            sb.append(path);
-            if (!path.endsWith(File.separator) && (++count < paths.length)) {
-                sb.append(File.separator);
-            }
-        }
+        if (prependSeparator) sb.append(File.separatorChar);
+        createPath(sb, paths);
         return sb.toString();
     }
 
@@ -164,6 +157,16 @@ public class Files {
             throw new IOException(e);
         } finally {
             IoUtils.safeClose(in);
+        }
+    }
+
+    public static void createPath(final StringBuilder sb, final String... paths) {
+        int count = 0;
+        for (String path : paths) {
+            sb.append(path);
+            if (!path.endsWith(File.separator) && (++count < paths.length)) {
+                sb.append(File.separatorChar);
+            }
         }
     }
 
