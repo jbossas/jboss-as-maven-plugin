@@ -148,7 +148,7 @@ public class Run extends Deploy {
      * A space delimited list of server arguments.
      */
     @Parameter(alias = "server-args", property = PropertyNames.SERVER_ARGS)
-    private String serverArgs;
+    private String[] serverArgs;
 
     /**
      * The timeout value to use when starting the server.
@@ -188,7 +188,7 @@ public class Run extends Deploy {
                 .setJvmArgs(splitBySpaces(jvmArgs))
                 .setServerConfig(this.serverConfig)
                 .setPropertiesFile(propertiesFile)
-                .setServerArgs(splitBySpaces(serverArgs))
+                .setServerArgs(serverArgs)
                 .setStartupTimeout(startupTimeout);
 
         // Print some server information
