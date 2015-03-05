@@ -31,7 +31,7 @@
     </parent>
     <groupId>org.jboss.as.plugins</groupId>
     <artifactId>jboss-as-maven-plugin</artifactId>
-    <version>7.7.Final-afsa-01</version>
+    <version>7.7.Final-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>JBoss AS7 Deployment Plugin</name>
 
@@ -58,7 +58,6 @@
     <properties>
         <version.junit.junit>4.11</version.junit.junit>
         <version.org.jboss.as>7.2.0.Final</version.org.jboss.as>
-        <version.org.jboss.as.cli>7.3.0.Final-redhat-14</version.org.jboss.as.cli>
         <!-- JBoss AS 7.1.2 distribution artifact is not deployed to the jboss
             nexus repository -->
         <version.org.jboss.as.dist>7.1.1.Final</version.org.jboss.as.dist>
@@ -259,7 +258,7 @@
         <dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-cli</artifactId>
-            <version>${version.org.jboss.as.cli}</version>
+            <version>${version.org.jboss.as}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.logging</groupId>
