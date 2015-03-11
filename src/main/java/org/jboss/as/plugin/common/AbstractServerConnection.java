@@ -108,6 +108,12 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
     @Parameter(property = PropertyNames.PASSWORD)
     private String password;
 
+    /**
+     * Specifies the timeout to be used when hitting the host. Default is 5000ms.
+     */
+    @Parameter(property = PropertyNames.TIMEOUT)
+    private int timeout = 5000;
+
     @Component(role = SettingsDecrypter.class  )
     private DefaultSettingsDecrypter settingsDecrypter;
 
@@ -161,7 +167,11 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         synchronized (CLIENT_LOCK) {
             ModelControllerClient result = client;
             if (result == null) {
-                result = client = ModelControllerClient.Factory.create(getHostAddress(), getPort(), getCallbackHandler());
+                try {
+                    result = client = ModelControllerClient.Factory.create(getHostAddress().getHostName(), getPort(), getCallbackHandler(), null, timeout);
+                } catch (UnknownHostException e) {
+                    throw new IllegalArgumentException(String.format("Host name '%s' is invalid.", hostname), e);
+                }
                 if (isDomainServer(result)) {
                     result = client = DomainClient.Factory.create(result);
                 }
