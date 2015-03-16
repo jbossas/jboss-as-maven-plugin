@@ -71,6 +71,8 @@ public interface PropertyNames {
 
     String PASSWORD = "jboss-as.password";
 
+    String TIMEOUT = "jboss-as.timeout";
+
     String PORT = "jboss-as.port";
 
     String RELOAD = "jboss-as.reload";
