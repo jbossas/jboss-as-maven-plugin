@@ -49,7 +49,7 @@ import javax.security.auth.callback.CallbackHandler;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @author Stuart Douglas
  */
-public abstract class AbstractServerConnection extends AbstractMojo implements ConnectionInfo, Closeable {
+public abstract class AbstractServerMojo extends AbstractMojo implements ConnectionInfo, Closeable {
 
     public static final String DEBUG_MESSAGE_NO_CREDS = "No username and password in settings.xml file - falling back to CLI entry";
     public static final String DEBUG_MESSAGE_NO_ID = "No <id> element was found in the POM - Getting credentials from CLI entry";
@@ -107,6 +107,12 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
      */
     @Parameter(property = PropertyNames.PASSWORD)
     private String password;
+
+    /**
+     * Indicates whether or not the goal should be skipped.
+     */
+    @Parameter(defaultValue = "false", property = PropertyNames.SKIP)
+    private boolean skip;
 
     @Component(role = SettingsDecrypter.class  )
     private DefaultSettingsDecrypter settingsDecrypter;
@@ -215,6 +221,15 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         return result;
     }
 
+    /**
+     * Indicates whether or not the goal should be skipped.
+     *
+     * @return {@code true} to skip the goal, otherwise {@code false}
+     */
+    protected boolean isSkip() {
+        return skip;
+    }
+
     private void getCredentialsFromSettings() {
         if(settings != null) {
             Server server = settings.getServer(id);
@@ -235,10 +250,10 @@ public abstract class AbstractServerConnection extends AbstractMojo implements C
         }
     }
 
-  private String decrypt(final Server server )   {
-    SettingsDecryptionResult decrypt = settingsDecrypter.decrypt(new DefaultSettingsDecryptionRequest(server));
-    return decrypt.getServer().getPassword();
-  }
+    private String decrypt(final Server server) {
+        SettingsDecryptionResult decrypt = settingsDecrypter.decrypt(new DefaultSettingsDecryptionRequest(server));
+        return decrypt.getServer().getPassword();
+    }
 
     private boolean isDomainServer(final ModelControllerClient client) {
         boolean result = false;

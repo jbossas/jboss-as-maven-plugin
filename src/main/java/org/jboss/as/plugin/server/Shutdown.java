@@ -29,7 +29,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.plugin.common.AbstractServerConnection;
+import org.jboss.as.plugin.common.AbstractServerMojo;
 import org.jboss.as.plugin.common.ServerOperations;
 import org.jboss.as.plugin.common.PropertyNames;
 
@@ -41,7 +41,7 @@ import org.jboss.as.plugin.common.PropertyNames;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "shutdown")
-public class Shutdown extends AbstractServerConnection {
+public class Shutdown extends AbstractServerMojo {
 
     /**
      * Set to {@code true} if a {@code reload} operation should be invoked instead of a {@code shutdown}.
@@ -51,6 +51,10 @@ public class Shutdown extends AbstractServerConnection {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (isSkip()) {
+            getLog().debug("Skipping server start");
+            return;
+        }
         try {
             synchronized (CLIENT_LOCK) {
                 final ModelControllerClient client = getClient();

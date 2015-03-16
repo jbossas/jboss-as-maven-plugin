@@ -77,6 +77,8 @@ public interface PropertyNames {
 
     String SERVER_CONFIG = "jboss-as.serverConfig";
 
+    String SKIP = "jboss-as.skip";
+
     String STARTUP_TIMEOUT = "jboss-as.startupTimeout";
 
     String USERNAME = "jboss-as.username";

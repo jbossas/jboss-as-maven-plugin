@@ -29,7 +29,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.as.plugin.common.AbstractServerConnection;
+import org.jboss.as.plugin.common.AbstractServerMojo;
 
 /**
  * Execute commands to the running JBoss Application Server.
@@ -49,7 +49,7 @@ import org.jboss.as.plugin.common.AbstractServerConnection;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "execute-commands", threadSafe = true)
-public class ExecuteCommands extends AbstractServerConnection {
+public class ExecuteCommands extends AbstractServerMojo {
 
     /**
      * The commands to execute.
@@ -64,6 +64,10 @@ public class ExecuteCommands extends AbstractServerConnection {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (isSkip()) {
+            getLog().debug("Skipping commands execution");
+            return;
+        }
         getLog().debug("Executing commands");
         synchronized (CLIENT_LOCK) {
             final ModelControllerClient client = getClient();

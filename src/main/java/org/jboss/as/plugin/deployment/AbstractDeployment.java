@@ -32,7 +32,7 @@ import org.apache.maven.project.MavenProject;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.domain.DomainClient;
 import org.jboss.as.plugin.cli.Commands;
-import org.jboss.as.plugin.common.AbstractServerConnection;
+import org.jboss.as.plugin.common.AbstractServerMojo;
 import org.jboss.as.plugin.common.DeploymentExecutionException;
 import org.jboss.as.plugin.common.DeploymentFailureException;
 import org.jboss.as.plugin.deployment.Deployment.Status;
@@ -46,7 +46,7 @@ import org.jboss.as.plugin.deployment.standalone.StandaloneDeployment;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  * @author Stuart Douglas
  */
-abstract class AbstractDeployment extends AbstractServerConnection {
+abstract class AbstractDeployment extends AbstractServerMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     protected MavenProject project;
@@ -76,12 +76,6 @@ abstract class AbstractDeployment extends AbstractServerConnection {
     private Commands afterDeployment;
 
     /**
-     * Set to {@code true} if you want the deployment to be skipped, otherwise {@code false}.
-     */
-    @Parameter(defaultValue = "false")
-    private boolean skip;
-
-    /**
      * The archive file.
      *
      * @return the archive file.
@@ -104,7 +98,7 @@ abstract class AbstractDeployment extends AbstractServerConnection {
 
     @Override
     public final void execute() throws MojoExecutionException, MojoFailureException {
-        if (skip) {
+        if (isSkip()) {
             getLog().debug(String.format("Skipping deployment of %s:%s", project.getGroupId(), project.getArtifactId()));
             return;
         }
