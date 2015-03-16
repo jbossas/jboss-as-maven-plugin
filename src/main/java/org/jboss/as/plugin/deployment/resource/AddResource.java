@@ -32,7 +32,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.Operations.CompositeOperationBuilder;
-import org.jboss.as.plugin.common.AbstractServerConnection;
+import org.jboss.as.plugin.common.AbstractServerMojo;
 import org.jboss.as.plugin.common.ServerOperations;
 import org.jboss.as.plugin.common.PropertyNames;
 import org.jboss.as.plugin.deployment.domain.Domain;
@@ -52,7 +52,7 @@ import org.jboss.dmr.Property;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "add-resource", threadSafe = true)
-public class AddResource extends AbstractServerConnection {
+public class AddResource extends AbstractServerMojo {
 
     public static final String GOAL = "add-resource";
 
@@ -109,12 +109,6 @@ public class AddResource extends AbstractServerConnection {
     @Parameter(defaultValue = "true", property = PropertyNames.ADD_RESOURCE_FORCE)
     private boolean force;
 
-    /**
-     * Set to {@code true} if you want the deployment to be skipped, otherwise {@code false}.
-     */
-    @Parameter(defaultValue = "false")
-    private boolean skip;
-
     @Override
     public String goal() {
         return GOAL;
@@ -122,7 +116,7 @@ public class AddResource extends AbstractServerConnection {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (skip) {
+        if (isSkip()) {
             getLog().debug(String.format("Skipping add-resource with address %s", address));
             return;
         }

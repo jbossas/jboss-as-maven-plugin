@@ -34,7 +34,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.jboss.as.plugin.common.AbstractServerConnection;
+import org.jboss.as.plugin.common.AbstractServerMojo;
 import org.jboss.as.plugin.common.Files;
 import org.jboss.as.plugin.common.PropertyNames;
 
@@ -47,7 +47,7 @@ import org.jboss.as.plugin.common.PropertyNames;
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
 @Mojo(name = "start", requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class Start extends AbstractServerConnection {
+public class Start extends AbstractServerMojo {
 
     public static final String JBOSS_DIR = "jboss-as-run";
 
@@ -166,6 +166,10 @@ public class Start extends AbstractServerConnection {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         final Log log = getLog();
+        if (isSkip()) {
+            log.debug("Skipping server start");
+            return;
+        }
         // Validate the environment
         final File jbossHome = extractIfRequired(targetDir);
         if (!jbossHome.isDirectory()) {
