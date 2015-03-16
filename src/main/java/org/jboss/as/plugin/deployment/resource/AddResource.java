@@ -33,8 +33,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.Operations.CompositeOperationBuilder;
 import org.jboss.as.plugin.common.AbstractServerMojo;
-import org.jboss.as.plugin.common.ServerOperations;
 import org.jboss.as.plugin.common.PropertyNames;
+import org.jboss.as.plugin.common.ServerOperations;
 import org.jboss.as.plugin.deployment.domain.Domain;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
@@ -123,17 +123,15 @@ public class AddResource extends AbstractServerMojo {
         try {
             final InetAddress host = getHostAddress();
             getLog().info(String.format("Executing goal %s on server %s (%s) port %s.", goal(), host.getHostName(), host.getHostAddress(), getPort()));
-            synchronized (CLIENT_LOCK) {
-                final ModelControllerClient client = getClient();
-                if (resources == null) {
-                    final Resource resource = (this.resource == null ? new Resource(address, properties, false) : this.resource);
-                    processResources(client, resource);
+            final ModelControllerClient client = getClient();
+            if (resources == null) {
+                final Resource resource = (this.resource == null ? new Resource(address, properties, false) : this.resource);
+                processResources(client, resource);
+            } else {
+                if (resources.length > 0) {
+                    processResources(client, resources);
                 } else {
-                    if (resources.length > 0) {
-                        processResources(client, resources);
-                    } else {
-                        getLog().warn("No resources were provided.");
-                    }
+                    getLog().warn("No resources were provided.");
                 }
             }
         } catch (Exception e) {

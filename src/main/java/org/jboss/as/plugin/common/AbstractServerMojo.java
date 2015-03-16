@@ -22,6 +22,12 @@
 
 package org.jboss.as.plugin.common;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import javax.security.auth.callback.CallbackHandler;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -34,13 +40,6 @@ import org.apache.maven.settings.crypto.SettingsDecryptionResult;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.domain.DomainClient;
 import org.jboss.dmr.ModelNode;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import javax.security.auth.callback.CallbackHandler;
 
 
 /**
@@ -59,8 +58,6 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
     public static final String DEBUG_MESSAGE_SETTINGS_HAS_CREDS = "Found username and password in the settings.xml file";
     public static final String DEBUG_MESSAGE_SETTINGS_HAS_ID = "Found the server's id in the settings.xml file";
 
-    protected static final Object CLIENT_LOCK = new Object();
-
     private volatile InetAddress address = null;
 
     private volatile CallbackHandler handler;
@@ -77,7 +74,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
     @Parameter(defaultValue = "9999", property = PropertyNames.PORT)
     private int port;
 
-   /**
+    /**
      * Specifies the id of the server if the username and password is to be
      * retrieved from the settings.xml file
      */
@@ -120,7 +117,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
     @Parameter(property = PropertyNames.TIMEOUT)
     private int timeout = 5000;
 
-    @Component(role = SettingsDecrypter.class  )
+    @Component(role = SettingsDecrypter.class)
     private DefaultSettingsDecrypter settingsDecrypter;
 
     private ModelControllerClient client;
@@ -150,9 +147,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
      * @return {@code true} if the connection is for a domain server, otherwise {@code false}
      */
     public final boolean isDomainServer() {
-        synchronized (CLIENT_LOCK) {
-            return isDomainServer(getClient());
-        }
+        return isDomainServer(getClient());
     }
 
     /**
@@ -169,29 +164,25 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
      *
      * @return the client
      */
-    public final ModelControllerClient getClient() {
-        synchronized (CLIENT_LOCK) {
-            ModelControllerClient result = client;
-            if (result == null) {
-                try {
-                    result = client = ModelControllerClient.Factory.create(getHostAddress().getHostName(), getPort(), getCallbackHandler(), null, timeout);
-                } catch (UnknownHostException e) {
-                    throw new IllegalArgumentException(String.format("Host name '%s' is invalid.", hostname), e);
-                }
-                if (isDomainServer(result)) {
-                    result = client = DomainClient.Factory.create(result);
-                }
+    public final synchronized ModelControllerClient getClient() {
+        ModelControllerClient result = client;
+        if (result == null) {
+            try {
+                result = client = ModelControllerClient.Factory.create(getHostAddress().getHostName(), getPort(), getCallbackHandler(), null, timeout);
+            } catch (UnknownHostException e) {
+                throw new IllegalArgumentException(String.format("Host name '%s' is invalid.", hostname), e);
             }
-            return result;
+            if (isDomainServer(result)) {
+                result = client = DomainClient.Factory.create(result);
+            }
         }
+        return result;
     }
 
     @Override
-    public final void close() {
-        synchronized (CLIENT_LOCK) {
-            IoUtils.safeClose(client);
-            client = null;
-        }
+    public final synchronized void close() {
+        IoUtils.safeClose(client);
+        client = null;
     }
 
     /**
@@ -217,8 +208,8 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
     public final synchronized CallbackHandler getCallbackHandler() {
         CallbackHandler result = handler;
         if (result == null) {
-            if(username == null && password == null) {
-                if(id != null) {
+            if (username == null && password == null) {
+                if (id != null) {
                     getCredentialsFromSettings();
                 } else {
                     getLog().debug(DEBUG_MESSAGE_NO_ID);
@@ -241,13 +232,13 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
     }
 
     private void getCredentialsFromSettings() {
-        if(settings != null) {
+        if (settings != null) {
             Server server = settings.getServer(id);
-            if(server != null) {
+            if (server != null) {
                 getLog().debug(DEBUG_MESSAGE_SETTINGS_HAS_ID);
                 password = decrypt(server);
                 username = server.getUsername();
-                if(username != null && password != null) {
+                if (username != null && password != null) {
                     getLog().debug(DEBUG_MESSAGE_SETTINGS_HAS_CREDS);
                 } else {
                     getLog().debug(DEBUG_MESSAGE_NO_CREDS);
@@ -275,7 +266,7 @@ public abstract class AbstractServerMojo extends AbstractMojo implements Connect
                 result = ("DOMAIN".equals(ServerOperations.readResultAsString(opResult)));
             }
         } catch (IOException e) {
-            if ( getLog().isDebugEnabled() )
+            if (getLog().isDebugEnabled())
                 getLog().debug(e);
             throw new IllegalStateException(String.format("I/O Error could not execute operation '%s'", op), e);
         }

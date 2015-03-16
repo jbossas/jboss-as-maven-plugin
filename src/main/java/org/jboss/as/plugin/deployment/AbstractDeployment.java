@@ -126,25 +126,23 @@ abstract class AbstractDeployment extends AbstractServerMojo {
      */
     protected void doExecute() throws MojoExecutionException, MojoFailureException {
         try {
-            synchronized (CLIENT_LOCK) {
-                validate();
-                final ModelControllerClient client = getClient();
-                final String matchPattern = getMatchPattern();
-                final MatchPatternStrategy matchPatternStrategy = getMatchPatternStrategy();
-                final Deployment deployment;
-                if (isDomainServer()) {
-                    deployment = DomainDeployment.create((DomainClient) client, domain, file(), name, getType(), matchPattern, matchPatternStrategy);
-                } else {
-                    deployment = StandaloneDeployment.create(client, file(), name, getType(), matchPattern, matchPatternStrategy);
+            validate();
+            final ModelControllerClient client = getClient();
+            final String matchPattern = getMatchPattern();
+            final MatchPatternStrategy matchPatternStrategy = getMatchPatternStrategy();
+            final Deployment deployment;
+            if (isDomainServer()) {
+                deployment = DomainDeployment.create((DomainClient) client, domain, file(), name, getType(), matchPattern, matchPatternStrategy);
+            } else {
+                deployment = StandaloneDeployment.create(client, file(), name, getType(), matchPattern, matchPatternStrategy);
+            }
+            switch (executeDeployment(client, deployment)) {
+                case REQUIRES_RESTART: {
+                    getLog().info("Server requires a restart");
+                    break;
                 }
-                switch (executeDeployment(client, deployment)) {
-                    case REQUIRES_RESTART: {
-                        getLog().info("Server requires a restart");
-                        break;
-                    }
-                    case SUCCESS:
-                        break;
-                }
+                case SUCCESS:
+                    break;
             }
         } catch (MojoFailureException e) {
             throw e;
