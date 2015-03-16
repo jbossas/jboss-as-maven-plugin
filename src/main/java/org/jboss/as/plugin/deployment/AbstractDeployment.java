@@ -58,7 +58,14 @@ abstract class AbstractDeployment extends AbstractServerMojo {
     private Domain domain;
 
     /**
-     * Specifies the name used for the deployment.
+     * Specifies the name used for the deployment. Note that the name should end in a valid deployment extension.
+     * <p>
+     * Examples:
+     * <ul>
+     * <li>{@code <name>example.war</name>}</li>
+     * <li>{@code <name>example.ear</name>}</li>
+     * </ul>
+     * </p>
      */
     @Parameter
     protected String name;
