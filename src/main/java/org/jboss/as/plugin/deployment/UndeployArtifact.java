@@ -79,7 +79,7 @@ public final class UndeployArtifact extends AbstractDeployment {
             throw new DeploymentFailureException("undeploy-artifact must specify the groupId");
         }
         @SuppressWarnings("unchecked")
-        final Set<Artifact> dependencies = project.getArtifacts();
+        final Set<Artifact> dependencies = project.getDependencyArtifacts();
         dependencies.addAll(this.project.getDependencyArtifacts());
         Artifact artifact = null;
         for (final Artifact a : dependencies) {
