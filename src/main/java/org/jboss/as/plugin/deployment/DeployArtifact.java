@@ -79,7 +79,7 @@ public final class DeployArtifact extends AbstractDeployment {
         if (groupId == null) {
             throw new DeploymentFailureException("deploy-artifact must specify the groupId");
         }
-        final Set<Artifact> dependencies = project.getArtifacts();
+        final Set<Artifact> dependencies = project.getDependencyArtifacts();
         // Allows provided dependencies to be seen
         dependencies.addAll(project.getDependencyArtifacts());
         Artifact artifact = null;
