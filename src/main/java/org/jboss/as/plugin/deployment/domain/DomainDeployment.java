@@ -39,8 +39,6 @@ import org.jboss.as.controller.client.helpers.domain.DomainDeploymentManager;
 import org.jboss.as.controller.client.helpers.domain.DuplicateDeploymentNameException;
 import org.jboss.as.controller.client.helpers.domain.ServerGroupDeploymentActionResult;
 import org.jboss.as.controller.client.helpers.domain.ServerGroupDeploymentPlanBuilder;
-import org.jboss.as.controller.client.helpers.domain.ServerIdentity;
-import org.jboss.as.controller.client.helpers.domain.ServerStatus;
 import org.jboss.as.controller.client.helpers.domain.ServerUpdateResult;
 import org.jboss.as.plugin.common.DeploymentExecutionException;
 import org.jboss.as.plugin.common.DeploymentFailureException;
@@ -191,7 +189,6 @@ public class DomainDeployment implements Deployment {
     @Override
     public Status execute() throws DeploymentExecutionException, DeploymentFailureException {
         try {
-            validate();
             final DomainDeploymentManager manager = client.getDeploymentManager();
             final DeploymentPlanBuilder builder = manager.newDeploymentPlan();
             DeploymentPlan plan = createPlan(builder);
@@ -206,30 +203,6 @@ public class DomainDeployment implements Deployment {
             throw new DeploymentExecutionException(e, "Error executing %s", type);
         }
         return Status.SUCCESS;
-    }
-
-    void validate() throws DeploymentFailureException {
-        final Map<ServerIdentity, ServerStatus> statuses = client.getServerStatuses();
-        // Check for NPE
-        final List<String> serverGroups = domain.getServerGroups();
-        for (String serverGroup : serverGroups) {
-            boolean notFound = true;
-            // Check the servers
-            for (ServerIdentity serverId : statuses.keySet()) {
-                if (serverGroup.equals(serverId.getServerGroupName())) {
-                    ServerStatus currentStatus = statuses.get(serverId);
-                    if (currentStatus != ServerStatus.STARTED) {
-                        throw new DeploymentFailureException("Status of server group '%s' is '%s', but is required to be '%s'.",
-                                serverGroup, currentStatus, ServerStatus.STARTED);
-                    }
-                    notFound = false;
-                    break;
-                }
-            }
-            if (notFound) {
-                throw new DeploymentFailureException("Server group '%s' does not exist on the server.", serverGroup);
-            }
-        }
     }
 
     @Override
