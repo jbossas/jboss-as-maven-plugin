@@ -33,6 +33,7 @@ import org.jboss.as.plugin.common.DeploymentFailureException;
 import org.jboss.as.plugin.common.PropertyNames;
 import org.jboss.as.plugin.deployment.Deployment.Type;
 
+import java.util.HashSet;
 /**
  * Deploys an arbitrary artifact to the JBoss application server
  *
@@ -79,7 +80,7 @@ public final class DeployArtifact extends AbstractDeployment {
         if (groupId == null) {
             throw new DeploymentFailureException("deploy-artifact must specify the groupId");
         }
-        final Set<Artifact> dependencies = project.getDependencyArtifacts();
+        final Set<Artifact> dependencies = new HashSet<Artifact>();
         // Allows provided dependencies to be seen
         dependencies.addAll(project.getDependencyArtifacts());
         Artifact artifact = null;
