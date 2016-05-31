@@ -40,8 +40,8 @@ import org.jboss.dmr.ModelNode;
  */
 final class StandaloneServer extends Server {
 
-    private static final String STARTING = "STARTING";
-    private static final String STOPPING = "STOPPING";
+    private static final String STARTING = "starting";
+    private static final String STOPPING = "stopping";
 
     private final ServerConfig serverConfig;
     private boolean isRunning;
@@ -151,8 +151,9 @@ final class StandaloneServer extends Server {
         } else {
             try {
                 final ModelNode result = client.execute(ServerOperations.createReadAttributeOperation(ServerOperations.SERVER_STATE));
-                isRunning = ServerOperations.isSuccessfulOutcome(result) && !STARTING.equals(ServerOperations.readResultAsString(result)) &&
-                        !STOPPING.equals(ServerOperations.readResultAsString(result));
+                System.out.println(result.asString());
+                isRunning = ServerOperations.isSuccessfulOutcome(result) && !STARTING.equalsIgnoreCase(ServerOperations.readResultAsString(result)) &&
+                        !STOPPING.equalsIgnoreCase(ServerOperations.readResultAsString(result));
             } catch (Throwable ignore) {
                 isRunning = false;
             }
