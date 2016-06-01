@@ -77,6 +77,8 @@ public interface PropertyNames {
 
     String RELOAD = "jboss-as.reload";
 
+    String RELOAD_TIMEOUT = "jboss-as.reload.timeout";
+
     String SERVER_CONFIG = "jboss-as.serverConfig";
 
     String SKIP = "jboss-as.skip";
