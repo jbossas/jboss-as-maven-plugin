@@ -22,6 +22,10 @@
 
 package org.jboss.as.plugin.server;
 
+import static org.jboss.as.controller.client.helpers.ClientConstants.CONTROLLER_PROCESS_STATE_STARTING;
+import static org.jboss.as.controller.client.helpers.ClientConstants.CONTROLLER_PROCESS_STATE_STOPPING;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -32,6 +36,7 @@ import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.plugin.common.AbstractServerMojo;
 import org.jboss.as.plugin.common.PropertyNames;
 import org.jboss.as.plugin.common.ServerOperations;
+import org.jboss.dmr.ModelNode;
 
 /**
  * Shuts down a running JBoss Application Server.
@@ -49,6 +54,12 @@ public class Shutdown extends AbstractServerMojo {
     @Parameter(defaultValue = "false", property = PropertyNames.RELOAD)
     private boolean reload;
 
+    /**
+     * The maximum time, in seconds, to wait for a live server after a reload.
+     */
+    @Parameter(defaultValue = "30", property = PropertyNames.RELOAD_TIMEOUT, alias = "reload-timeout")
+    private int reloadTimeout;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (isSkip()) {
@@ -59,6 +70,7 @@ public class Shutdown extends AbstractServerMojo {
             final ModelControllerClient client = getClient();
             if (reload) {
                 client.execute(ServerOperations.createOperation(ServerOperations.RELOAD));
+                waitForStandalone(client, reloadTimeout);
             } else {
                 client.execute(ServerOperations.createOperation(ServerOperations.SHUTDOWN));
             }
@@ -79,5 +91,37 @@ public class Shutdown extends AbstractServerMojo {
     @Override
     public String goal() {
         return "shutdown";
+    }
+
+    private void waitForStandalone(final ModelControllerClient client, final int startupTimeout) throws InterruptedException, IOException {
+        long timeout = startupTimeout * 1000;
+        final long sleep = 100L;
+        while (timeout > 0) {
+            long before = System.currentTimeMillis();
+            if (isStandaloneRunning(client))
+                break;
+            timeout -= (System.currentTimeMillis() - before);
+            TimeUnit.MILLISECONDS.sleep(sleep);
+            timeout -= sleep;
+        }
+        if (timeout <= 0) {
+            throw new RuntimeException(String.format("The server did not reload within %s seconds.", startupTimeout));
+        }
+    }
+
+    private boolean isStandaloneRunning(final ModelControllerClient client) {
+        try {
+            final ModelNode response = client.execute(ServerOperations.createReadAttributeOperation("server-state"));
+            if (ServerOperations.isSuccessfulOutcome(response)) {
+                final String state = ServerOperations.readResult(response).asString();
+                return !CONTROLLER_PROCESS_STATE_STARTING.equals(state)
+                        && !CONTROLLER_PROCESS_STATE_STOPPING.equals(state);
+            }
+        } catch (RuntimeException e) {
+            getLog().debug("Interrupted determining if standalone is running", e);
+        } catch (IOException e) {
+            getLog().debug("Error checking if a standalone server is running", e);
+        }
+        return false;
     }
 }
