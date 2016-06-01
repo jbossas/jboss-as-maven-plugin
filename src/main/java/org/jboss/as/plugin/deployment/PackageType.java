@@ -13,7 +13,7 @@ import org.apache.maven.project.MavenProject;
 final class PackageType implements Comparable<PackageType> {
 
     private static final PackageType MAVEN_PLUGIN = new PackageType("maven-project");
-    private static final PackageType POM = new PackageType("pom");
+    private static final PackageType POM = new PackageType("pom", true);
     private static final PackageType EJB = new PackageType("ejb", "jar");
     private static final Map<String, PackageType> DEFAULT_TYPES;
 
@@ -26,15 +26,24 @@ final class PackageType implements Comparable<PackageType> {
 
     private final String packaging;
     private final String fileExtension;
+    private final boolean ignored;
 
     private PackageType(final String packaging) {
-        this.packaging = packaging;
-        this.fileExtension = packaging;
+        this(packaging, packaging, false);
+    }
+
+    private PackageType(final String packaging, final boolean ignored) {
+        this(packaging, packaging, ignored);
     }
 
     private PackageType(final String packaging, final String fileExtension) {
+        this(packaging, fileExtension, false);
+    }
+
+    private PackageType(final String packaging, final String fileExtension, final boolean ignored) {
         this.packaging = packaging;
         this.fileExtension = fileExtension;
+        this.ignored = ignored;
     }
 
     /**
@@ -58,7 +67,7 @@ final class PackageType implements Comparable<PackageType> {
      * @return {@code true} if the package type should be ignored, otherwise {@code false}.
      */
     public boolean isIgnored() {
-        return false;
+        return ignored;
     }
 
     /**
