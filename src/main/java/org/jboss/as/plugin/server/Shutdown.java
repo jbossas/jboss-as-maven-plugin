@@ -60,6 +60,18 @@ public class Shutdown extends AbstractServerMojo {
     @Parameter(defaultValue = "30", property = PropertyNames.RELOAD_TIMEOUT, alias = "reload-timeout")
     private int reloadTimeout;
 
+    /**
+     * Set to {@code true} if a {@code restart} operation should be invoked instead of a {@code shutdown}.
+     */
+    @Parameter(defaultValue = "false", property = PropertyNames.RESTART)
+    private boolean restart;
+
+    /**
+     * The maximum time, in seconds, to wait for a live server after a restart.
+     */
+    @Parameter(defaultValue = "30", property = PropertyNames.RESTART_TIMEOUT, alias = "restart-timeout")
+    private int restartTimeout;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (isSkip()) {
@@ -71,6 +83,19 @@ public class Shutdown extends AbstractServerMojo {
             if (reload) {
                 client.execute(ServerOperations.createOperation(ServerOperations.RELOAD));
                 waitForStandalone(client, reloadTimeout);
+            } else if (restart) {
+                getLog().info("Restart");
+                ModelNode modelNode = ServerOperations.createOperation(ServerOperations.SHUTDOWN);
+                modelNode.get("restart").set(true);
+                client.execute(modelNode);
+                // Bad hack to get maven to complete it's message output
+                try {
+                    TimeUnit.MILLISECONDS.sleep(500L);
+                } catch (InterruptedException ignore) {
+                    ignore.printStackTrace();
+                    // no-op
+                }
+                waitForStandalone(getClient(), restartTimeout);
             } else {
                 client.execute(ServerOperations.createOperation(ServerOperations.SHUTDOWN));
             }
@@ -97,6 +122,7 @@ public class Shutdown extends AbstractServerMojo {
         long timeout = startupTimeout * 1000;
         final long sleep = 100L;
         while (timeout > 0) {
+            getLog().info("Sleeping");
             long before = System.currentTimeMillis();
             if (isStandaloneRunning(client))
                 break;

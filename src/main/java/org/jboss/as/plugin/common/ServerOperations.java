@@ -48,6 +48,7 @@ public class ServerOperations extends Operations {
     public static final String READ_CHILDREN_NAMES = "read-children-names";
     public static final String READ_RESOURCE = "read-resource";
     public static final String RELOAD = "reload";
+    public static final String RESTART = "shutdown(restart=true)";
     public static final String SERVER_STATE = "server-state";
     public static final String SHUTDOWN = "shutdown";
 
