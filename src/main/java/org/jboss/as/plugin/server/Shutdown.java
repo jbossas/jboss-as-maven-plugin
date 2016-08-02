@@ -41,7 +41,7 @@ import org.jboss.dmr.ModelNode;
 /**
  * Shuts down a running JBoss Application Server.
  * <p/>
- * Can also be used to issue a reload instead of a full shutdown.
+ * Can also be used to issue a reload or a restart instead of a full shutdown.
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
@@ -75,7 +75,7 @@ public class Shutdown extends AbstractServerMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (isSkip()) {
-            getLog().debug("Skipping server start");
+            getLog().debug("Skipping server shutdown");
             return;
         }
         try {
@@ -84,28 +84,16 @@ public class Shutdown extends AbstractServerMojo {
                 client.execute(ServerOperations.createOperation(ServerOperations.RELOAD));
                 waitForStandalone(client, reloadTimeout);
             } else if (restart) {
-                getLog().info("Restart");
+                getLog().debug("Restarting");
                 ModelNode modelNode = ServerOperations.createOperation(ServerOperations.SHUTDOWN);
                 modelNode.get("restart").set(true);
                 client.execute(modelNode);
-                // Bad hack to get maven to complete it's message output
-                try {
-                    TimeUnit.MILLISECONDS.sleep(500L);
-                } catch (InterruptedException ignore) {
-                    ignore.printStackTrace();
-                    // no-op
-                }
-                waitForStandalone(getClient(), restartTimeout);
+                waitForStandalone(client, restartTimeout);
+                getLog().debug("We are back!");
             } else {
                 client.execute(ServerOperations.createOperation(ServerOperations.SHUTDOWN));
             }
-            // Bad hack to get maven to complete it's message output
-            try {
-                TimeUnit.MILLISECONDS.sleep(500L);
-            } catch (InterruptedException ignore) {
-                ignore.printStackTrace();
-                // no-op
-            }
+            waitForMessageOutput();
         } catch (Exception e) {
             throw new MojoExecutionException(String.format("Could not execute goal %s. Reason: %s", goal(), e.getMessage()), e);
         } finally {
@@ -118,11 +106,21 @@ public class Shutdown extends AbstractServerMojo {
         return "shutdown";
     }
 
+
+    private void waitForMessageOutput() {
+        // Bad hack to get maven to complete it's message output
+        try {
+            TimeUnit.MILLISECONDS.sleep(500L);
+        } catch (InterruptedException ignore) {
+            // ignore.printStackTrace();
+            // no-op
+        }
+    }
+
     private void waitForStandalone(final ModelControllerClient client, final int startupTimeout) throws InterruptedException, IOException {
         long timeout = startupTimeout * 1000;
         final long sleep = 100L;
         while (timeout > 0) {
-            getLog().info("Sleeping");
             long before = System.currentTimeMillis();
             if (isStandaloneRunning(client))
                 break;
